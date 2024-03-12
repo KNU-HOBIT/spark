@@ -15,7 +15,7 @@ IMAGE_NAME=$(jq -r '.IMAGE_NAME' $CONFIG_FILE)
 IMAGE_TAG=$(jq -r '.IMAGE_TAG' $CONFIG_FILE)
 
 SPARK_DIR=$(jq -r '.SPARK_DIR' $CONFIG_FILE)
-WORK_DIR=$(jq -r '.WORK_DIR' $CONFIG_FILE)
+LOCAL_DIR=$(jq -r '.LOCAL_DIR' $CONFIG_FILE)
 PYSPARK_CODE_DIR=$(jq -r '.PYSPARK_CODE_DIR' $CONFIG_FILE)
 PYSPARK_CODE_NAME=$(jq -r '.PYSPARK_CODE_NAME' $CONFIG_FILE)
 DOCKERFILE_DIR=$(jq -r '.DOCKERFILE_DIR' $CONFIG_FILE)
@@ -28,8 +28,8 @@ FULL_IMAGE_PATH="${IMAGE_REPO_NAME}/${IMAGE_NAME}:${IMAGE_TAG}"
 $SPARK_DIR/bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $DOCKERFILE_DIR/$DOCKERFILE_NAME build
 $SPARK_DIR/bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $DOCKERFILE_DIR/$DOCKERFILE_NAME push
 
-# Spark job 제출 명령어 디버깅
-echo "
+# Spark job 제출 명령어를 변수에 저장
+SPARK_SUBMIT_CMD="
 $SPARK_DIR/bin/spark-submit \
   --master k8s://$K8S_CLUSTER_ADDRESS \
   --deploy-mode cluster \
@@ -42,20 +42,11 @@ $SPARK_DIR/bin/spark-submit \
   --conf spark.kubernetes.namespace=$NAMESPACE \
   --conf spark.kubernetes.container.image=$FULL_IMAGE_PATH \
   --conf spark.driver.extraJavaOptions='-Divy.cache.dir=/tmp -Divy.home=/tmp' \
-  local://$WORK_DIR/$PYSPARK_CODE_DIR/$PYSPARK_CODE_NAME
+  local://$LOCAL_DIR/$PYSPARK_CODE_DIR/$PYSPARK_CODE_NAME
 "
 
+# 명령어를 디버깅(출력) 목적으로 Echo
+echo "$SPARK_SUBMIT_CMD"
+
 # 실제 Spark job 제출
-$SPARK_DIR/bin/spark-submit \
-  --master k8s://$K8S_CLUSTER_ADDRESS \
-  --deploy-mode cluster \
-  --name $SPARK_JOB_NAME \
-  --num-executors $NUM_EXECUTORS \
-  --executor-cores $EXECUTOR_CORES \
-  --executor-memory $EXECUTOR_MEMORY \
-  --conf spark.kubernetes.authenticate.driver.serviceAccountName=$SERVICEACCOUNT_NAME \
-  --conf spark.sql.streaming.kafka.useDeprecatedOffsetFetching=true \
-  --conf spark.kubernetes.namespace=$NAMESPACE \
-  --conf spark.kubernetes.container.image=$FULL_IMAGE_PATH \
-  --conf spark.driver.extraJavaOptions='-Divy.cache.dir=/tmp -Divy.home=/tmp' \
-  local://$WORK_DIR/$PYSPARK_CODE_DIR/$PYSPARK_CODE_NAME
+eval $SPARK_SUBMIT_CMD
