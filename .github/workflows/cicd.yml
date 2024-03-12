@@ -8,10 +8,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository Code
+      - name: 저장소 코드 체크아웃
         uses: actions/checkout@v3
 
-      - name: Set Target Directory from config.json
+      - name: config.json에서 타겟 디렉토리 설정
         id: config-values
         run: |
           SPARK_DIR=$(jq -r '.SPARK_DIR' config.json)
@@ -21,7 +21,7 @@ jobs:
           echo "target_dir=$TARGET_DIR" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: AAA
+      - name: 타겟 디렉토리 준비
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SCOUTER01_SSH_HOST }}
@@ -32,7 +32,7 @@ jobs:
             mkdir -p ${{ steps.config-values.outputs.target_dir }}
             rm -rf ${{ steps.config-values.outputs.target_dir }}/*
 
-      - name: Copy Repository Code
+      - name: 저장소 코드 복사
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SCOUTER01_SSH_HOST }}
@@ -42,7 +42,7 @@ jobs:
           source: "."
           target: ${{ steps.config-values.outputs.target_dir }}
 
-      - name: AAA
+      - name: Dockerfile 생성 및 디버깅, Spark 작업 배포
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SCOUTER01_SSH_HOST }}
