@@ -15,8 +15,8 @@ jobs:
         id: config-values
         run: |
           SPARK_DIR=$(jq -r '.SPARK_DIR' config.json)
-          CODE_DIR=$(jq -r '.CODE_DIR' config.json)
-          TARGET_DIR="${SPARK_DIR}${CODE_DIR}"
+          PYSPARK_CODE_DIR=$(jq -r '.PYSPARK_CODE_DIR' config.json)
+          TARGET_DIR="${SPARK_DIR}${PYSPARK_CODE_DIR}"
           echo "Setting TARGET_DIR: $TARGET_DIR"
           echo "target_dir=$TARGET_DIR" >> $GITHUB_OUTPUT
         shell: bash
