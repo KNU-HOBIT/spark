@@ -1,0 +1,22 @@
+{
+    "SPARK_JOB_NAME" : "test",
+    "K8S_CLUSTER_ADDRESS" : "https://127.0.0.1:6443",
+    "NUM_EXECUTORS" : 6,
+    "EXECUTOR_CORES" : 4,
+    "EXECUTOR_MEMORY" : "10G",
+    "SERVICEACCOUNT_NAME" : "spark",
+    "NAMESPACE" : "spark",
+    
+    "IMAGE_REPO_NAME" : "noyusu",
+    "IMAGE_NAME" : "spark-py",
+    "IMAGE_TAG" : "latest",
+    
+
+    "SPARK_DIR" : "/home/scouter/spark-on-k8s/spark-3.4.1-bin-hadoop3",
+    "WORK_DIR":"/opt/spark/work-dir",
+    "PYSPARK_CODE_DIR" : "examples/src/main/python/spark_code/yusu",
+    "PYSPARK_CODE_NAME" : "read-dataset.py",
+    "DOCKERFILE_DIR" : ".",
+    "DOCKERFILE_NAME" : "Dockerfile"
+
+}

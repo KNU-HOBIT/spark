@@ -1,0 +1,61 @@
+name: cicd
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+    
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v3
+
+      - name: Set Target Directory from config.json
+        id: config-values
+        run: |
+          SPARK_DIR=$(jq -r '.SPARK_DIR' config.json)
+          CODE_DIR=$(jq -r '.CODE_DIR' config.json)
+          TARGET_DIR="${SPARK_DIR}${CODE_DIR}"
+          echo "Setting TARGET_DIR: $TARGET_DIR"
+          echo "target_dir=$TARGET_DIR" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: AAA
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SCOUTER01_SSH_HOST }}
+          username: ${{ secrets.SCOUTER01_SSH_USERNAME }}
+          key: ${{ secrets.YUSU_SSH_KEY }}
+          port: ${{ secrets.SCOUTER01_SSH_PORT }}
+          script: |
+            mkdir -p ${{ steps.config-values.outputs.target_dir }}
+            rm -rf ${{ steps.config-values.outputs.target_dir }}/*
+
+      - name: Copy Repository Code
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SCOUTER01_SSH_HOST }}
+          username: ${{ secrets.SCOUTER01_SSH_USERNAME }}
+          key: ${{ secrets.YUSU_SSH_KEY }}
+          port: ${{ secrets.SCOUTER01_SSH_PORT }}
+          source: "."
+          target: ${{ steps.config-values.outputs.target_dir }}
+
+      - name: AAA
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SCOUTER01_SSH_HOST }}
+          username: ${{ secrets.SCOUTER01_SSH_USERNAME }}
+          key: ${{ secrets.YUSU_SSH_KEY }}
+          port: ${{ secrets.SCOUTER01_SSH_PORT }}
+          script: |
+            cd ${{ steps.config-values.outputs.target_dir }}
+            chmod +x ./create_dockerfile.sh
+            ./create_dockerfile.sh
+
+            echo "Dockerfile contents:"
+            cat Dockerfile
+
+            chmod +x ./deploy-spark-job.sh
+            ./deploy-spark-job.sh
