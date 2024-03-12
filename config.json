@@ -12,7 +12,7 @@
     "IMAGE_TAG" : "latest",
     
 
-    "SPARK_DIR" : "/home/scouter/spark-on-k8s/spark-3.5.1-bin-hadoop3",
+    "SPARK_DIR" : "/home/scouter/spark-on-k8s/spark-3.4.1-bin-hadoop3",
     "WORK_DIR":"/opt/spark/work-dir",
     "PYSPARK_CODE_DIR" : "examples/src/main/python/spark_code/yusu",
     "PYSPARK_CODE_NAME" : "read-dataset.py",
