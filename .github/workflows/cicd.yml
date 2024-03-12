@@ -51,6 +51,7 @@ jobs:
           port: ${{ secrets.SCOUTER01_SSH_PORT }}
           script: |
             cd ${{ steps.config-values.outputs.target_dir }}
+            pwd
             chmod +x ./create_dockerfile.sh
             ./create_dockerfile.sh
 
