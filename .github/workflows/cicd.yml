@@ -55,5 +55,5 @@ jobs:
             chmod +x ./create_dockerfile.sh
             ./create_dockerfile.sh
 
-            chmod +x ./deploy-spark-job.sh
-            ./deploy-spark-job.sh
+            chmod +x ./build-and-submit-spark.sh
+            ./build-and-submit-spark.sh
