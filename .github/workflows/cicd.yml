@@ -52,6 +52,7 @@ jobs:
           script: |
             cd ${{ steps.config-values.outputs.target_dir }}
             pwd
+            ls
             chmod +x ./create_dockerfile.sh
             ./create_dockerfile.sh
 
