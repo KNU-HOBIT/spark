@@ -58,5 +58,4 @@ $SPARK_DIR/bin/spark-submit \
   --conf spark.kubernetes.namespace=$NAMESPACE \
   --conf spark.kubernetes.container.image=$FULL_IMAGE_PATH \
   --conf spark.driver.extraJavaOptions='-Divy.cache.dir=/tmp -Divy.home=/tmp' \
-  --driver-class-path $SPARK_DIR/jars/bcprov-jdk15on-1.70.jar \
   local://$WORK_DIR/$PYSPARK_CODE_DIR/$PYSPARK_CODE_NAME
