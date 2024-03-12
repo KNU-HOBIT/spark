@@ -28,7 +28,8 @@ FULL_IMAGE_PATH="${IMAGE_REPO_NAME}/${IMAGE_NAME}:${IMAGE_TAG}"
 $SPARK_DIR/bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $DOCKERFILE_DIR/$DOCKERFILE_NAME build
 $SPARK_DIR/bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $DOCKERFILE_DIR/$DOCKERFILE_NAME push
 
-# Spark job을 제출합니다.
+# Spark job 제출 명령어 디버깅
+echo "
 $SPARK_DIR/bin/spark-submit \
   --master k8s://$K8S_CLUSTER_ADDRESS \
   --deploy-mode cluster \
@@ -40,5 +41,21 @@ $SPARK_DIR/bin/spark-submit \
   --conf spark.sql.streaming.kafka.useDeprecatedOffsetFetching=true \
   --conf spark.kubernetes.namespace=$NAMESPACE \
   --conf spark.kubernetes.container.image=$FULL_IMAGE_PATH \
-  --conf spark.driver.extraJavaOptions="-Divy.cache.dir=/tmp -Divy.home=/tmp" \
+  --conf spark.driver.extraJavaOptions='-Divy.cache.dir=/tmp -Divy.home=/tmp' \
+  local://$WORK_DIR/$PYSPARK_CODE_DIR/$PYSPARK_CODE_NAME
+"
+
+# 실제 Spark job 제출
+$SPARK_DIR/bin/spark-submit \
+  --master k8s://$K8S_CLUSTER_ADDRESS \
+  --deploy-mode cluster \
+  --name $SPARK_JOB_NAME \
+  --num-executors $NUM_EXECUTORS \
+  --executor-cores $EXECUTOR_CORES \
+  --executor-memory $EXECUTOR_MEMORY \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=$SERVICEACCOUNT_NAME \
+  --conf spark.sql.streaming.kafka.useDeprecatedOffsetFetching=true \
+  --conf spark.kubernetes.namespace=$NAMESPACE \
+  --conf spark.kubernetes.container.image=$FULL_IMAGE_PATH \
+  --conf spark.driver.extraJavaOptions='-Divy.cache.dir=/tmp -Divy.home=/tmp' \
   local://$WORK_DIR/$PYSPARK_CODE_DIR/$PYSPARK_CODE_NAME
