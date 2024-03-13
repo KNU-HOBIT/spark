@@ -48,13 +48,13 @@ COPY python/pyspark ${SPARK_HOME}/python/pyspark
 COPY python/lib ${SPARK_HOME}/python/lib
 '
 # 중간 부분 동적 생성
-# echo "# 해당 디렉토리의 모든 파일을 컨테이너의 작업 디렉토리로 복사"
-# echo "COPY $PYSPARK_CODE_DIR $LOCAL_DIR/$PYSPARK_CODE_DIR"
-# echo "COPY $PYSPARK_CODE_DIR $LOCAL_DIR/work-dir"
-# echo ""
-# echo "# Install Python dependencies from requirements.txt"
-# echo "RUN pip3 install -r /opt/spark/$PYSPARK_CODE_DIR/requirements.txt"
-# echo ""
+echo "# 해당 디렉토리의 모든 파일을 컨테이너의 작업 디렉토리로 복사"
+echo "COPY $PYSPARK_CODE_DIR $LOCAL_DIR/$PYSPARK_CODE_DIR"
+echo "COPY $PYSPARK_CODE_DIR $LOCAL_DIR/work-dir"
+echo ""
+echo "# Install Python dependencies from requirements.txt"
+echo "RUN pip3 install -r /opt/spark/$PYSPARK_CODE_DIR/requirements.txt"
+echo ""
 # Dockerfile 마무리 부분
 echo '
 WORKDIR /opt/spark/work-dir
