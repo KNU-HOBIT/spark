@@ -6,6 +6,7 @@ spark = SparkSession.builder \
         .master("local") \
         .appName("newnewdaddy") \
         .getOrCreate()
+spark.sparkContext.setLogLevel('WARN')
 
 # csv dataset 경로
 print("csv dataset 경로")
