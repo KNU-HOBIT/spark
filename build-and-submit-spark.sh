@@ -25,8 +25,8 @@ DOCKERFILE_NAME=$(jq -r '.DOCKERFILE_NAME' $CONFIG_FILE)
 FULL_IMAGE_PATH="${IMAGE_REPO_NAME}/${IMAGE_NAME}:${IMAGE_TAG}"
 
 # Docker 이미지를 빌드하고 푸시
-$SPARK_DIR/bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $DOCKERFILE_DIR/$DOCKERFILE_NAME build
-$SPARK_DIR/bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $DOCKERFILE_DIR/$DOCKERFILE_NAME push
+$SPARK_DIR/bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $SPARK_DIR/$DOCKERFILE_DIR/$DOCKERFILE_NAME build
+$SPARK_DIR/bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $SPARK_DIR/$DOCKERFILE_DIR/$DOCKERFILE_NAME push
 
 # Spark job 제출 명령어를 변수에 저장
 SPARK_SUBMIT_CMD="
