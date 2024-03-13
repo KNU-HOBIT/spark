@@ -9,7 +9,6 @@
 
     "IMAGE_REPO_NAME" : "noyusu",
     "IMAGE_NAME" : "spark-py",
-    "IMAGE_TAG" : "latest",
 
     "SPARK_DIR" : "/home/scouter/spark-on-k8s/spark-3.4.1-bin-hadoop3",
     "LOCAL_DIR":"/opt/spark",

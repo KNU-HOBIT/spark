@@ -12,7 +12,10 @@ SERVICEACCOUNT_NAME=$(jq -r '.SERVICEACCOUNT_NAME' $CONFIG_FILE)
 NAMESPACE=$(jq -r '.NAMESPACE' $CONFIG_FILE)
 IMAGE_REPO_NAME=$(jq -r '.IMAGE_REPO_NAME' $CONFIG_FILE)
 IMAGE_NAME=$(jq -r '.IMAGE_NAME' $CONFIG_FILE)
-IMAGE_TAG=$(jq -r '.IMAGE_TAG' $CONFIG_FILE)
+# 임의의 UUID를 생성합니다. 이때, uuidgen 명령어의 결과에서 '-'를 제거하고 앞부분만 사용하여 짧게 만듭니다.
+UUID=$(uuidgen | tr -d '-' | cut -c 1-8)
+# 기본 IMAGE_TAG에 UUID를 붙여서 최종 IMAGE_TAG를 구성합니다.
+IMAGE_TAG="${UUID}"
 
 SPARK_DIR=$(jq -r '.SPARK_DIR' $CONFIG_FILE)
 LOCAL_DIR=$(jq -r '.LOCAL_DIR' $CONFIG_FILE)
