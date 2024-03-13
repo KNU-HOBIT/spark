@@ -34,8 +34,6 @@ $SPARK_DIR/bin/spark-submit \
   --master k8s://$K8S_CLUSTER_ADDRESS \
   --name $SPARK_JOB_NAME \
   --deploy-mode cluster \
-  --driver-cores 1 \
-  --driver-memory 512m \
   --num-executors $NUM_EXECUTORS \
   --executor-cores $EXECUTOR_CORES \
   --executor-memory $EXECUTOR_MEMORY \
@@ -44,7 +42,7 @@ $SPARK_DIR/bin/spark-submit \
   --conf spark.kubernetes.authenticate.driver.serviceAccountName=$SERVICEACCOUNT_NAME \
   --conf spark.driver.extraJavaOptions='-Divy.cache.dir=/tmp -Divy.home=/tmp' \
   --conf spark.sql.streaming.kafka.useDeprecatedOffsetFetching=true \
-  ./$PYSPARK_CODE_NAME
+  local://$LOCAL_DIR/$PYSPARK_CODE_DIR/$PYSPARK_CODE_NAME
 "
 
 # 명령어를 디버깅(출력) 목적으로 Echo
