@@ -53,8 +53,5 @@ jobs:
             cd ${{ steps.config-values.outputs.target_dir }}
             pwd
             ls
-            chmod +x ./create_dockerfile.sh
-            ./create_dockerfile.sh
-
             chmod +x ./build-and-submit-spark.sh
             ./build-and-submit-spark.sh

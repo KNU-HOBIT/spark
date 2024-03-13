@@ -24,13 +24,14 @@ DOCKERFILE_NAME=$(jq -r '.DOCKERFILE_NAME' $CONFIG_FILE)
 # 완전한 이미지 경로 구성
 FULL_IMAGE_PATH="${IMAGE_REPO_NAME}/${IMAGE_NAME}:${IMAGE_TAG}"
 
+cd $SPARK_DIR
 # Docker 이미지를 빌드하고 푸시
-$SPARK_DIR/bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $SPARK_DIR/$DOCKERFILE_DIR/$DOCKERFILE_NAME build
-$SPARK_DIR/bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $SPARK_DIR/$DOCKERFILE_DIR/$DOCKERFILE_NAME push
+./bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $DOCKERFILE_DIR/$DOCKERFILE_NAME build
+./bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $DOCKERFILE_DIR/$DOCKERFILE_NAME push
 
 # Spark job 제출 명령어를 변수에 저장
 SPARK_SUBMIT_CMD="
-$SPARK_DIR/bin/spark-submit \
+./bin/spark-submit \
   --master k8s://$K8S_CLUSTER_ADDRESS \
   --name $SPARK_JOB_NAME \
   --deploy-mode cluster \
