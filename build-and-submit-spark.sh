@@ -42,7 +42,7 @@ $SPARK_DIR/bin/spark-submit \
   --conf spark.kubernetes.namespace=$NAMESPACE \
   --conf spark.kubernetes.container.image=$FULL_IMAGE_PATH \
   --conf spark.driver.extraJavaOptions='-Divy.cache.dir=/tmp -Divy.home=/tmp' \
-  local://$LOCAL_DIR/$PYSPARK_CODE_DIR/$PYSPARK_CODE_NAME/
+  local://$LOCAL_DIR/$PYSPARK_CODE_DIR/$PYSPARK_CODE_NAME
 "
 
 # 명령어를 디버깅(출력) 목적으로 Echo
