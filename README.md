@@ -25,6 +25,8 @@ Github Action을 이용해서,
     ```
     ######################## 수정 ##############################
 
+    FROM python:3.8 # -> 기존은 args로 받아오는 형태였는데, 하드하게, 3.8버전으로 fix.
+
     COPY examples/src/main/python/spark_code/yusu/ /opt/spark/work-dir/
 
     RUN pip3 install -r /opt/spark/work-dir/requirements.txt
