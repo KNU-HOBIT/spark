@@ -35,6 +35,8 @@ MANIFEST
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+build_log.txt
+spark_submit_log.txt
 
 # Unit test / coverage reports
 htmlcov/
@@ -127,6 +129,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+spark_env/
 
 # Spyder project settings
 .spyderproject

@@ -11,11 +11,11 @@ EXECUTOR_MEMORY=$(jq -r '.EXECUTOR_MEMORY' $CONFIG_FILE)
 SERVICEACCOUNT_NAME=$(jq -r '.SERVICEACCOUNT_NAME' $CONFIG_FILE)
 NAMESPACE=$(jq -r '.NAMESPACE' $CONFIG_FILE)
 IMAGE_REPO_NAME=$(jq -r '.IMAGE_REPO_NAME' $CONFIG_FILE)
-IMAGE_NAME=$(jq -r '.IMAGE_NAME' $CONFIG_FILE)
-# 임의의 UUID를 생성합니다. 이때, uuidgen 명령어의 결과에서 '-'를 제거하고 앞부분만 사용하여 짧게 만듭니다.
-UUID=$(uuidgen | tr -d '-' | cut -c 1-8)
-# 기본 IMAGE_TAG에 UUID를 붙여서 최종 IMAGE_TAG를 구성합니다.
-IMAGE_TAG="${UUID}"
+# 현재 년월일과 시분초 정보를 사용하여 데이터 정보를 생성
+DATA_INFO=$(date +"%Y.%m.%d.%H.%M.%S")
+
+# 데이터 정보를 IMAGE_TAG로 사용
+IMAGE_TAG="${DATA_INFO}"
 
 SPARK_DIR=$(jq -r '.SPARK_DIR' $CONFIG_FILE)
 LOCAL_DIR=$(jq -r '.LOCAL_DIR' $CONFIG_FILE)
@@ -24,8 +24,15 @@ PYSPARK_CODE_NAME=$(jq -r '.PYSPARK_CODE_NAME' $CONFIG_FILE)
 DOCKERFILE_DIR=$(jq -r '.DOCKERFILE_DIR' $CONFIG_FILE)
 DOCKERFILE_NAME=$(jq -r '.DOCKERFILE_NAME' $CONFIG_FILE)
 
+TARGET_DIR="${SPARK_DIR}/${PYSPARK_CODE_DIR}"
+
+
+
+
+
+
 # 완전한 이미지 경로 구성
-FULL_IMAGE_PATH="${IMAGE_REPO_NAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+FULL_IMAGE_PATH="${IMAGE_REPO_NAME}/spark-py:${IMAGE_TAG}"
 
 # Docker 이미지 빌드 명령어 저장
 BUILD_CMD="./bin/docker-image-tool.sh -r $IMAGE_REPO_NAME -t $IMAGE_TAG -p $DOCKERFILE_DIR/$DOCKERFILE_NAME build"
@@ -49,15 +56,33 @@ SPARK_SUBMIT_CMD="
   --conf spark.sql.streaming.kafka.useDeprecatedOffsetFetching=true \
   local://$LOCAL_DIR/$PYSPARK_CODE_DIR/$PYSPARK_CODE_NAME
 "
-# 빌드 명령어 디버깅
+# 빌드 명령어를 로그 파일에 기록
 echo "Building Docker image with command: $BUILD_CMD"
+echo "Building Docker image with command: $BUILD_CMD" >> build_log.txt
 
-# 푸시 명령어 디버깅
+# 푸시 명령어를 로그 파일에 기록
 echo "Pushing Docker image with command: $PUSH_CMD"
+echo "Pushing Docker image with command: $PUSH_CMD" >> build_log.txt
 
-# 명령어를 디버깅(출력) 목적으로 Echo
+# Spark submit 명령어를 로그 파일에 기록
 echo "$SPARK_SUBMIT_CMD"
+echo "$SPARK_SUBMIT_CMD" >> spark_submit_log.txt
 
+#################################################################### 
+
+# 대상 디렉토리 생성
+mkdir -p "$TARGET_DIR"
+
+# 대상 디렉토리 내부의 모든 파일 삭제
+rm -rf "$TARGET_DIR"/*
+
+# 현재 디렉토리의 모든 파일을 대상 디렉토리로 복사
+cp -r ./* "$TARGET_DIR"
+
+# 대상 디렉토리 내용 확인
+cd "$TARGET_DIR"
+ls
+#################################################################### 
 
 cd $SPARK_DIR
 

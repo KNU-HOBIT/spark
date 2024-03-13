@@ -8,7 +8,6 @@
     "NAMESPACE" : "spark",
 
     "IMAGE_REPO_NAME" : "noyusu",
-    "IMAGE_NAME" : "spark-py",
 
     "SPARK_DIR" : "/home/scouter/spark-on-k8s/spark-3.4.1-bin-hadoop3",
     "LOCAL_DIR":"/opt/spark",
@@ -17,5 +16,4 @@
     "PYSPARK_CODE_NAME" : "read-dataset.py",
     "DOCKERFILE_DIR" : "kubernetes/dockerfiles/spark/bindings/python",
     "DOCKERFILE_NAME" : "Dockerfile"
-
 }
