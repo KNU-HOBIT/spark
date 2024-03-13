@@ -12,7 +12,7 @@ SERVICEACCOUNT_NAME=$(jq -r '.SERVICEACCOUNT_NAME' $CONFIG_FILE)
 NAMESPACE=$(jq -r '.NAMESPACE' $CONFIG_FILE)
 IMAGE_REPO_NAME=$(jq -r '.IMAGE_REPO_NAME' $CONFIG_FILE)
 # 현재 년월일과 시분초 정보를 사용하여 데이터 정보를 생성
-DATA_INFO=$(date +"%Y.%m.%d.%H.%M.%S")
+DATA_INFO=$(date +"%Y-%m-%d.%H-%M-%S")
 
 # 데이터 정보를 IMAGE_TAG로 사용
 IMAGE_TAG="${DATA_INFO}"
@@ -25,10 +25,6 @@ DOCKERFILE_DIR=$(jq -r '.DOCKERFILE_DIR' $CONFIG_FILE)
 DOCKERFILE_NAME=$(jq -r '.DOCKERFILE_NAME' $CONFIG_FILE)
 
 TARGET_DIR="${SPARK_DIR}/${PYSPARK_CODE_DIR}"
-
-
-
-
 
 
 # 완전한 이미지 경로 구성
@@ -69,6 +65,7 @@ echo "$SPARK_SUBMIT_CMD"
 echo "$SPARK_SUBMIT_CMD" >> spark_submit_log.txt
 
 #################################################################### 
+# 로컬일 때는 이거 활성화 해주고, Github Action으로 실행될 때는 이거 실행되면 안됨.
 
 # 대상 디렉토리 생성
 mkdir -p "$TARGET_DIR"
@@ -82,13 +79,19 @@ cp -r ./* "$TARGET_DIR"
 # 대상 디렉토리 내용 확인
 cd "$TARGET_DIR"
 ls
+
 #################################################################### 
 
 cd $SPARK_DIR
-
-# 빌드 명령어 실행
+echo "============================================================"
+echo "빌드 명령어 실행"
+echo "============================================================"
 eval $BUILD_CMD
-# 푸시 명령어 실행
+echo "============================================================"
+echo "푸시 명령어 실행"
+echo "============================================================"
 eval $PUSH_CMD
-# 실제 Spark job 제출
+echo "============================================================"
+echo "실제 Spark job 제출"
+echo "============================================================"
 eval $SPARK_SUBMIT_CMD

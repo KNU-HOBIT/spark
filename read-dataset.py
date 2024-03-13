@@ -12,7 +12,7 @@ spark = SparkSession.builder \
 spark.sparkContext.setLogLevel('WARN')
 
 # csv dataset 경로
-print("csv dataset 경로")
+print("~~~csv dataset 경로~~~")
 data_path = os.path.join(os.getcwd(), 'test.csv')
 
 print("="*100)
@@ -37,27 +37,27 @@ print(sdf.show(10))
 print("="*100)
 
 
-# 원본 데이터 URL에서 보스턴 주택 가격 데이터 세트를 로드
-print("3. 원본 데이터 URL에서 보스턴 주택 가격 데이터 세트를 로드")
-data_url = "http://lib.stat.cmu.edu/datasets/boston"
-raw_df = pd.read_csv(data_url, sep="\s+", skiprows=22, header=None)
-data = np.hstack([raw_df.values[::2, :], raw_df.values[1::2, :2]])
-target = raw_df.values[1::2, 2]
+# # 원본 데이터 URL에서 보스턴 주택 가격 데이터 세트를 로드
+# print("3. 원본 데이터 URL에서 보스턴 주택 가격 데이터 세트를 로드")
+# data_url = "http://lib.stat.cmu.edu/datasets/boston"
+# raw_df = pd.read_csv(data_url, sep="\s+", skiprows=22, header=None)
+# data = np.hstack([raw_df.values[::2, :], raw_df.values[1::2, :2]])
+# target = raw_df.values[1::2, 2]
 
-# 보스턴 주택 가격 데이터 세트의 컬럼 이름 정의
-print("4. 보스턴 주택 가격 데이터 세트의 컬럼 이름 정의")
-boston_columns = [
-    "CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD",
-    "TAX", "PTRATIO", "B", "LSTAT"
-]
+# # 보스턴 주택 가격 데이터 세트의 컬럼 이름 정의
+# print("4. 보스턴 주택 가격 데이터 세트의 컬럼 이름 정의")
+# boston_columns = [
+#     "CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD",
+#     "TAX", "PTRATIO", "B", "LSTAT"
+# ]
 
-# 데이터와 타겟을 결합하여 pandas DataFrame 생성
-boston_pdf = pd.DataFrame(data, columns=boston_columns)
-boston_pdf['PRICE'] = target
+# # 데이터와 타겟을 결합하여 pandas DataFrame 생성
+# boston_pdf = pd.DataFrame(data, columns=boston_columns)
+# boston_pdf['PRICE'] = target
 
-# pandas DataFrame을 Spark DataFrame으로 변환
-print("5. pandas DataFrame을 Spark DataFrame으로 변환")
-boston_sdf = spark.createDataFrame(boston_pdf)
-print("="*100)
-print(boston_sdf.show(10))
-print("="*100)
+# # pandas DataFrame을 Spark DataFrame으로 변환
+# print("5. pandas DataFrame을 Spark DataFrame으로 변환")
+# boston_sdf = spark.createDataFrame(boston_pdf)
+# print("="*100)
+# print(boston_sdf.show(10))
+# print("="*100)
