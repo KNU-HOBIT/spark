@@ -5,7 +5,6 @@ import os
 
 
 spark = SparkSession.builder \
-        .master("local") \
         .appName("test") \
         .getOrCreate()
 spark.sparkContext.setLogLevel('WARN')
@@ -60,3 +59,16 @@ boston_sdf = spark.createDataFrame(boston_pdf)
 print("="*100)
 print(boston_sdf.show(10))
 print("="*100)
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 2개의 행과 4개의 열을 가진 subplots를 이용. axs는 4x2개의 ax를 가짐.
+fig, axs = plt.subplots(figsize=(16,8) , ncols=4 , nrows=2)
+lm_features = ['RM','ZN','INDUS','NOX','AGE','PTRATIO','LSTAT','RAD']
+colors = ['g', 'r', 'b', 'c', 'm', 'y', 'orange', 'darkblue' ]
+for i , feature in enumerate(lm_features):
+    row = int(i/4)
+    col = i%4
+    # 시본의 regplot을 이용해 산점도와 선형 회귀 직선을 함께 표현
+    sns.regplot(x=feature , y='PRICE',data=boston_pdf , ax=axs[row][col], color=colors[i])

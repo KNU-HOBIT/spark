@@ -5,15 +5,7 @@
     "EXECUTOR_CORES" : 4,
     "EXECUTOR_MEMORY" : "10G",
     "SERVICEACCOUNT_NAME" : "spark",
-    "NAMESPACE" : "spark",
-
     "IMAGE_REPO_NAME" : "noyusu",
 
-    "SPARK_DIR" : "/home/scouter/spark-on-k8s/spark-3.4.1-bin-hadoop3",
-    "LOCAL_DIR":"/opt/spark",
-    "PYSPARK_CODE_DIR" : "examples/src/main/python/spark_code/yusu",
-
-    "PYSPARK_CODE_NAME" : "read-dataset.py",
-    "DOCKERFILE_DIR" : "kubernetes/dockerfiles/spark/bindings/python",
-    "DOCKERFILE_NAME" : "Dockerfile"
+    "PYSPARK_CODE_NAME" : "read-dataset.py"
 }

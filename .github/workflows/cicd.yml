@@ -14,9 +14,7 @@ jobs:
       - name: config.json에서 타겟 디렉토리 설정
         id: config-values
         run: |
-          SPARK_DIR=$(jq -r '.SPARK_DIR' config.json)
-          PYSPARK_CODE_DIR=$(jq -r '.PYSPARK_CODE_DIR' config.json)
-          TARGET_DIR="${SPARK_DIR}/${PYSPARK_CODE_DIR}"
+          TARGET_DIR="/tmp/pyspark-code/"
           echo "Setting TARGET_DIR: $TARGET_DIR"
           echo "target_dir=$TARGET_DIR" >> $GITHUB_OUTPUT
         shell: bash
@@ -55,3 +53,5 @@ jobs:
             ls
             chmod +x ./build-and-submit-spark.sh
             ./build-and-submit-spark.sh
+            cd ..
+            rm -rf ${{ steps.config-values.outputs.target_dir }}
