@@ -11,7 +11,7 @@ Github Action을 이용해서,
 까지 자동화 시킨
 개발 Pipeline 구성이 목표.
 
-### 환경 구축 중 발생한 이슈사항.
+### 환경 구축 중 발생한 이슈사항. 
 
 1) 종속 라이브러리 설치와 관련하여, 실행 오류발생.
 2) 인증 관련 오류 발생.(KubernetesClientException("JcaPEMKeyConverter is provided by BouncyCastle, an optional dependency. To use support for EC Keys you must explicitly add this dependency to classpath.");)
