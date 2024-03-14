@@ -29,7 +29,7 @@ PUSH_CMD="docker push $FULL_IMAGE_PATH"
 
 # Spark job 제출 명령어를 변수에 저장
 SPARK_SUBMIT_CMD="
-spark-submit \
+$SPARK_HOME/bin/spark-submit \
   --master k8s://$K8S_CLUSTER_ADDRESS \
   --name $SPARK_JOB_NAME \
   --deploy-mode cluster \
