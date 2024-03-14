@@ -32,7 +32,7 @@ Github Action을 이용해서,
 
     ############################################################
     ```
-    위 내용들 Dockerfile에 추가. 원본 파일은 [다음](https://github.com/apache/spark/blob/master/resource-managers/kubernetes/docker/src/main/dockerfiles/spark/bindings/python/Dockerfile)을 참고.
+    위 내용들 Dockerfile에 추가. 원본 도커파일은 [다음](https://github.com/apache/spark/blob/master/resource-managers/kubernetes/docker/src/main/dockerfiles/spark/bindings/python/Dockerfile)을 참고.
 
 
 2) `bcpkix-jdk15on-1.70.jar`,`bcprov-jdk15on-1.70.jar`
@@ -40,29 +40,25 @@ Github Action을 이용해서,
 
 1) 문제점을 찾아볼려고 다양한 것들을 바꿔보면서 submit을 해보며 찾았는데, 모든 조건이 동일할 때, tag명을 `latest`를 쓴 경우에 파드 내부적으로 코드 경로를 파악하지 못하는 문제점이 발생하고, 그렇지 않은 임의의 tag명을 붙였을 때는 정상적으로 코드가 작동하였다.
 
-    이를 해결하기위해서,다음과 같이 쉘 코드를 수정하였고
-
-    
+    이를 해결하기위해서,다음과 같이 쉘 코드를 수정
 
     ```
-    # 임의의 UUID를 생성합. 이때, uuidgen 명령어의 결과에서 '-'를 제거하고 앞부분만 사용하여 짧게 생성.
+    # 현재 년월일과 시분초 정보를 사용하여 데이터 정보를 생성
+    DATA_INFO=$(date +"%Y-%m-%d.%H-%M-%S")
 
-    UUID=$(uuidgen | tr -d '-' | cut -c 1-8)
+    # 데이터 정보를 IMAGE_TAG로 사용
+    IMAGE_TAG="${DATA_INFO}"
 
-    # 기본 IMAGE_TAG에 UUID를 붙여, 최종 IMAGE_TAG를 구성.
-    
-    IMAGE_TAG="${UUID}"
+    . . .
+
+    # 완전한 이미지 경로 구성
+    FULL_IMAGE_PATH="${IMAGE_REPO_NAME}/spark-py:${IMAGE_TAG}"
     ```
 
     이 후, `build` -> `push` -> `job-submit` 과정에서 사용되는 이미지 tag가 중복되지않고 매번 다르게 설정이 되어 해결되었다.
 
 
-    `uuidgen` 명령어가 시스템에 설치되어 있지 않은 경우,다음과 같은 명령어로 설치해야한다.
-    ```
-    sudo apt-get install uuid-runtime  # Debian/Ubuntu
-    sudo yum install uuidgen           # CentOS/RHEL
-    ```
-4) `kubernetes/dockerfiles/spark/bindings/python/Dockerfile` 을 수정하여, Python3.10.12버전으로 고정하였고, 마찬가지로 로컬 내의 가상환경도 이와 같이 고정 시켜 해결.
+2) `kubernetes/dockerfiles/spark/bindings/python/Dockerfile` 을 수정하여, Python3.10.12버전으로 고정하였고, 마찬가지로 로컬 내의 가상환경도 이와 같이 고정 시켜 해결.
 
     ```
     ######################## 수정 ##############################
@@ -92,7 +88,7 @@ Github Action을 이용해서,
 
     ############################################################
     ```
-    위 내용로 Dockerfile 수정. 원본 파일은 [다음](https://github.com/apache/spark/blob/master/resource-managers/kubernetes/docker/src/main/dockerfiles/spark/bindings/python/Dockerfile)을 참고.
+    위 내용로 Dockerfile 수정. 원본 도커파일은 [다음](https://github.com/apache/spark/blob/master/resource-managers/kubernetes/docker/src/main/dockerfiles/spark/bindings/python/Dockerfile)을 참고.
 
     로컬도 마찬가지로 다음과 같은 명령어로 가상환경 생성.
 
