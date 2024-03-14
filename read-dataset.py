@@ -6,7 +6,7 @@ import os
 
 spark = SparkSession.builder \
         .master("local") \
-        .appName("newnewdaddy") \
+        .appName("test") \
         .getOrCreate()
 spark.sparkContext.setLogLevel('WARN')
 
