@@ -3,35 +3,14 @@ import pandas as pd
 import numpy as np
 import os
 
-
 spark = SparkSession.builder \
         .appName("test") \
         .getOrCreate()
 spark.sparkContext.setLogLevel('WARN')
 
-# csv dataset 경로
-print("csv dataset 경로")
-data_path = os.path.join(os.getcwd(), 'test.csv')
-
 print("="*100)
 print("FILES IN THIS DIRECTORY")
 print(os.listdir(os.getcwd()))
-print("="*100)
-
-# 1. pandas dataframe 생성 및 출력
-print("1. pandas dataframe 생성 및 출력")
-pdf = pd.read_csv(data_path)
-print("="*100)
-print("PANDAS DATAFRAME")
-print(pdf.head(10))
-print("="*100)
-
-# 2. spark dataframe 생성 및 출력
-print("2. spark dataframe 생성 및 출력")
-sdf = spark.read.csv(data_path, header=True)
-print("="*100)
-print("SPARK DATAFRAME")
-print(sdf.show(10))
 print("="*100)
 
 
@@ -62,7 +41,17 @@ print("="*100)
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+from datetime import datetime
 
+# 저장할 디렉토리 경로 설정
+directory = './plots/'
+
+# 디렉토리가 존재하지 않으면 생성
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
+print("6. 시본의 regplot을 이용해 산점도와 선형 회귀 직선을 함께 표현")
+print("="*100)
 # 2개의 행과 4개의 열을 가진 subplots를 이용. axs는 4x2개의 ax를 가짐.
 fig, axs = plt.subplots(figsize=(16,8) , ncols=4 , nrows=2)
 lm_features = ['RM','ZN','INDUS','NOX','AGE','PTRATIO','LSTAT','RAD']
@@ -72,3 +61,9 @@ for i , feature in enumerate(lm_features):
     col = i%4
     # 시본의 regplot을 이용해 산점도와 선형 회귀 직선을 함께 표현
     sns.regplot(x=feature , y='PRICE',data=boston_pdf , ax=axs[row][col], color=colors[i])
+    
+# 지정된 파일 이름으로 현재 그림을 저장
+timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+filename = f'PRICE 산점도 & 선형 회귀 직선-{timestamp}.png'
+plt.savefig(os.path.join(directory, filename))
+print("="*100)

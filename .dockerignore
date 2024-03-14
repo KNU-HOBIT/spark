@@ -5,3 +5,6 @@ myenv/
 *.sh
 README.md
 *log*
+.dockerignore
+Dockerfile
+plots/
