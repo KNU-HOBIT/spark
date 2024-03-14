@@ -11,7 +11,7 @@ spark = SparkSession.builder \
 spark.sparkContext.setLogLevel('WARN')
 
 # csv dataset 경로
-print("csv dataset 경로") 
+print("csv dataset 경로")
 data_path = os.path.join(os.getcwd(), 'test.csv')
 
 print("="*100)
