@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# 스크립트가 실패한 명령어를 만나면 즉시 종료
+set -e
+
 # 인자로부터 Docker 아이디와 패스워드 받기
 DOCKER_ID=$1
 DOCKER_PASSWORD=$2
