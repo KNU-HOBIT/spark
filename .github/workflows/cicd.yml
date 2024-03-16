@@ -41,6 +41,7 @@ jobs:
           DOCKER_ID: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           IMAGE_REPO_NAME: ${{ secrets.DOCKER_USERNAME }}
+        shell: bash
 
 
       - name: 원격 서버 타겟 디렉토리 준비
