@@ -37,5 +37,6 @@ $SPARK_HOME/bin/spark-submit \
 
 echo "============================================================"
 echo "실제 Spark job 제출"
+echo "$SPARK_SUBMIT_CMD"
 echo "============================================================"
 eval $SPARK_SUBMIT_CMD

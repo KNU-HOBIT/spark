@@ -1,6 +1,6 @@
 {
     "SPARK_JOB_NAME" : "test",
-    "K8S_CLUSTER_ADDRESS" : "https://155.230.34.51:6443",
+    "K8S_CLUSTER_ADDRESS" : "https://127.0.0.1:6443",
     "NUM_EXECUTORS" : 6,
     "EXECUTOR_CORES" : 4,
     "EXECUTOR_MEMORY" : "10G",
