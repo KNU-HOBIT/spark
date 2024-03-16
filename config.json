@@ -7,6 +7,6 @@
     "SERVICEACCOUNT_NAME" : "spark",
     "IMAGE_REPO_NAME" : "noyusu",
 
-    "SPARK_HOME": "/home/scouter/spark-on-k8s/spark-3.4.1-bin-hadoop3",
+    "SPARK_HOME": "/home/scouter/spark-on-k8s/spark-3.2.4-bin-hadoop3.2",
     "PYSPARK_CODE_NAME" : "read-dataset.py"
 }

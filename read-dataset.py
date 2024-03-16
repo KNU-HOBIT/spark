@@ -5,9 +5,10 @@ import os
 
 spark = SparkSession.builder \
         .appName("test") \
+        .config("spark.mongodb.read.connection.uri", "mongodb://155.230.34.51:32323/mongodb.collid") \
+        .config("spark.mongodb.write.connection.uri", "mongodb://155.230.34.51:32323/mongodb.collid") \
         .getOrCreate() \
-        .config("spark.mongodb.read.connection.uri", "mongodb://10.42.0.58:27017/test.coll") \
-        .config("spark.mongodb.write.connection.uri", "mongodb://10.42.0.58:27017/test.coll")
+
 spark.sparkContext.setLogLevel('WARN')
 
 print("="*100)
@@ -85,6 +86,7 @@ print("="*100)
 # MongoDB에 데이터 쓰기
 print("8. MongoDB에 데이터 쓰기")
 df.write.format("mongo").mode("append").save()
+
 print("="*100)
 
 # MongoDB에서 데이터 읽기

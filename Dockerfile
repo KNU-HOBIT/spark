@@ -1,4 +1,4 @@
-FROM apache/spark:3.4.1-python3
+FROM noyusu/spark-py:3.2.4
 
 USER root
 
