@@ -7,6 +7,9 @@ set -e
 DOCKER_ID=$1
 DOCKER_PASSWORD=$2
 
+echo "$DOCKER_ID"
+echo "$DOCKER_PASSWORD"
+
 # config.json 파일에서 설정값을 읽어옵니다.
 CONFIG_FILE="./config.json"
 SPARK_HOME=$(jq -r '.SPARK_HOME' $CONFIG_FILE)
