@@ -5,7 +5,9 @@ import os
 
 spark = SparkSession.builder \
         .appName("test") \
-        .getOrCreate()
+        .getOrCreate() \
+        .config("spark.mongodb.read.connection.uri", "mongodb://10.42.0.58:27017/test.coll") \
+        .config("spark.mongodb.write.connection.uri", "mongodb://10.42.0.58:27017/test.coll")
 spark.sparkContext.setLogLevel('WARN')
 
 print("="*100)
@@ -66,4 +68,31 @@ for i , feature in enumerate(lm_features):
 timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
 filename = f'PRICE 산점도 & 선형 회귀 직선-{timestamp}.png'
 plt.savefig(os.path.join(directory, filename))
+print("="*100)
+
+
+# MONGODB TEST
+from pyspark.sql import Row
+
+# 예제 데이터 생성
+print("7. MONGODB TEST / 예제 데이터 생성")
+print("="*100)
+data = [Row(name="Alice", age=25), Row(name="Bob", age=30)]
+df = spark.createDataFrame(data)
+print(df.show(10))
+print("="*100)
+
+# MongoDB에 데이터 쓰기
+print("8. MongoDB에 데이터 쓰기")
+df.write.format("mongo").mode("append").save()
+print("="*100)
+
+# MongoDB에서 데이터 읽기
+print("9. MongoDB에서 데이터 읽기")
+df_loaded = spark.read.format("mongo").load()
+print("="*100)
+
+# 읽어온 데이터 출력
+print("10. MongoDB에서 데이터 읽기")
+df_loaded.show()
 print("="*100)
