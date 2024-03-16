@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# 인자로부터 Docker 아이디와 패스워드 받기
+DOCKER_ID=$1
+DOCKER_PASSWORD=$2
+
 # config.json 파일에서 설정값을 읽어옵니다.
 CONFIG_FILE="./config.json"
 SPARK_HOME=$(jq -r '.SPARK_HOME' $CONFIG_FILE)
@@ -41,6 +45,13 @@ $SPARK_HOME/bin/spark-submit \
   local:///workspace/pyspark/$PYSPARK_CODE_NAME
 "
 
+
+echo "============================================================"
+echo "Docker 로그아웃"
+docker logout
+echo "============================================================"
+echo "Docker 로그인"
+echo $DOCKER_PASSWORD | docker login --username $DOCKER_ID --password-stdin
 echo "============================================================"
 echo "빌드 명령어"
 echo "$BUILD_CMD"
