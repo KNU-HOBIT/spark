@@ -52,6 +52,6 @@ jobs:
             pwd
             ls
             chmod +x ./build-and-submit-spark.sh
-            ./build-and-submit-spark.sh ${{ secrets.DOCKER_ID }} ${{ secrets.DOCKER_PASSWORD }}
+            ./build-and-submit-spark.sh ${{ secrets.DOCKER_USERNAME }} ${{ secrets.DOCKER_PASSWORD }}
             cd ..
             rm -rf ${{ steps.config-values.outputs.target_dir }}
