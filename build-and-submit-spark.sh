@@ -22,7 +22,7 @@ SERVICEACCOUNT_NAME=$(jq -r '.SERVICEACCOUNT_NAME' $CONFIG_FILE)
 IMAGE_REPO_NAME=$(jq -r '.IMAGE_REPO_NAME' $CONFIG_FILE)
 # 현재 년월일과 시분초 정보를 사용하여 데이터 정보를 생성
 DATA_INFO=$(date +"%Y-%m-%d.%H-%M-%S")
-# 데이터 정보를 IMAGE_TAG로 사용
+# 데이터 정보를 IMAGE_TAG로 사용 
 IMAGE_TAG="${DATA_INFO}"
 
 PYSPARK_CODE_NAME=$(jq -r '.PYSPARK_CODE_NAME' $CONFIG_FILE)
