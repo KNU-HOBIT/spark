@@ -33,14 +33,15 @@ jobs:
         run: |
           DATA_INFO=$(date +"%Y-%m-%d.%H-%M-%S")
           IMAGE_TAG="${DATA_INFO}"
-          FULL_IMAGE_PATH="${{ secrets.DOCKER_USERNAME }}/pyspark:${IMAGE_TAG}"
+          FULL_IMAGE_PATH="${DOCKER_USERNAME}/pyspark:${IMAGE_TAG}"
           echo "full_image_path=$FULL_IMAGE_PATH" >> $GITHUB_OUTPUT
-          docker build -t ${{ steps.docker-values.outputs.full_image_path }} .
-          docker push ${{ steps.docker-values.outputs.full_image_path }}
+          docker build -t $FULL_IMAGE_PATH .
+          docker push $FULL_IMAGE_PATH
         env:
           DOCKER_ID: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           IMAGE_REPO_NAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} # 추가된 부분
         shell: bash
 
 
