@@ -65,6 +65,7 @@ jobs:
           port: ${{ secrets.SCOUTER01_SSH_PORT }}
           source: "./config.json ./cicd-submit-spark.sh"
           target: ${{ steps.config-values.outputs.target_dir }}
+          debug: "true"
 
       - name: Dockerfile 생성 및 디버깅, Spark 작업 배포
         uses: appleboy/ssh-action@master
