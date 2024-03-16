@@ -37,6 +37,8 @@ jobs:
           echo "full_image_path=$FULL_IMAGE_PATH" >> $GITHUB_OUTPUT
           docker build -t $FULL_IMAGE_PATH .
           docker push $FULL_IMAGE_PATH
+          chmod +x ./cicd-submit-spark.sh
+          ./cicd-submit-spark.sh ${{ steps.docker-values.outputs.full_image_path }}
         env:
           DOCKER_ID: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -78,7 +80,7 @@ jobs:
             cd ${{ steps.config-values.outputs.target_dir }}
             pwd
             ls
-            chmod +x ./build-and-submit-spark.sh
-            ./build-and-submit-spark.sh ${{ steps.docker-values.outputs.full_image_path }}
+            chmod +x ./cicd-submit-spark.sh
+            ./cicd-submit-spark.sh ${{ steps.docker-values.outputs.full_image_path }}
             cd ..
             rm -rf ${{ steps.config-values.outputs.target_dir }}
