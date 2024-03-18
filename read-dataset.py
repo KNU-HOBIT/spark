@@ -84,7 +84,7 @@ print("="*100)
 # MongoDB에 데이터 쓰기
 print("8. MongoDB에 데이터 쓰기")
 df.write.format("mongodb") \
-    .option("spark.mongodb.write.connection.uri", "mongodb://adminuser:password123@155.230.34.51:32323/") \
+    .option("spark.mongodb.write.connection.uri", "mongodb://adminuser:password123@10.43.182.229:27017/") \
     .option("spark.mongodb.write.database", "test_database") \
     .option("spark.mongodb.write.collection", "test_collection") \
     .mode("append").save()
@@ -94,7 +94,7 @@ print("="*100)
 # MongoDB에서 데이터 읽기
 print("9. MongoDB에서 데이터 읽기")
 df_loaded = spark.read.format("mongodb") \
-    .option("spark.mongodb.read.connection.uri", "mongodb://adminuser:password123@155.230.34.51:32323/") \
+    .option("spark.mongodb.read.connection.uri", "mongodb://adminuser:password123@10.43.182.229:27017/") \
     .option("spark.mongodb.read.database", "test_database") \
     .option("spark.mongodb.read.collection", "test_collection") \
     .load()
