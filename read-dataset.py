@@ -5,6 +5,7 @@ import os
 
 spark = SparkSession.builder \
         .appName("test") \
+        .config("spark.jars", "/root/.ivy2/jars/*") \
         .getOrCreate() \
 
 spark.sparkContext.setLogLevel('WARN')
