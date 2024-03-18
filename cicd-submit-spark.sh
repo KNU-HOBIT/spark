@@ -32,7 +32,7 @@ $SPARK_HOME/bin/spark-submit \
   --executor-memory $EXECUTOR_MEMORY \
   --conf spark.kubernetes.container.image=$FULL_IMAGE_PATH \
   --conf spark.kubernetes.authenticate.driver.serviceAccountName=$SERVICEACCOUNT_NAME \
-  --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2 \
+  --packages org.mongodb.spark:mongo-spark-connector_2.12-10.2.2-all.jar \
   local:///workspace/pyspark/$PYSPARK_CODE_NAME
 "
 
