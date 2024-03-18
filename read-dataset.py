@@ -3,10 +3,17 @@ import pandas as pd
 import numpy as np
 import os
 
+working_directory = 'jars/*'
+
 spark = SparkSession.builder \
         .appName("test") \
-        .config("spark.mongodb.read.connection.uri", "mongodb://155.230.34.51:32323/mongodb.collid") \
-        .config("spark.mongodb.write.connection.uri", "mongodb://155.230.34.51:32323/mongodb.collid") \
+        .config("spark.mongodb.read.connection.uri", "mongodb://adminuser:password123@155.230.34.51:32323/") \
+        .config("spark.mongodb.read.database", "test_database") \
+        .config("spark.mongodb.read.collection", "test_collection") \
+        .config("spark.mongodb.write.connection.uri", "mongodb://adminuser:password123@155.230.34.51:32323/") \
+        .config("spark.mongodb.write.database", "test_database") \
+        .config("spark.mongodb.write.collection", "test_collection") \
+        .config('spark.driver.extraClassPath', working_directory) \
         .getOrCreate() \
 
 spark.sparkContext.setLogLevel('WARN')
@@ -85,13 +92,13 @@ print("="*100)
 
 # MongoDB에 데이터 쓰기
 print("8. MongoDB에 데이터 쓰기")
-df.write.format("mongo").mode("append").save()
+df.write.format("mongodb").mode("append").save()
 
 print("="*100)
 
 # MongoDB에서 데이터 읽기
 print("9. MongoDB에서 데이터 읽기")
-df_loaded = spark.read.format("mongo").load()
+df_loaded = spark.read.format("mongodb").load()
 print("="*100)
 
 # 읽어온 데이터 출력
