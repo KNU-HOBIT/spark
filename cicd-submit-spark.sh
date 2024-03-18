@@ -32,7 +32,7 @@ $SPARK_HOME/bin/spark-submit \
   --executor-memory $EXECUTOR_MEMORY \
   --conf spark.kubernetes.container.image=$FULL_IMAGE_PATH \
   --conf spark.kubernetes.authenticate.driver.serviceAccountName=$SERVICEACCOUNT_NAME \
-  --jars https://repo1.maven.org/maven2/org/mongodb/spark/mongo-spark-connector_2.12/10.2.2/mongo-spark-connector_2.12-10.2.2.jar,https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-sync/4.8.2/mongodb-driver-sync-4.8.2.jar,https://repo1.maven.org/maven2/org/mongodb/bson/4.8.2/bson-4.8.2.jar,https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-core/4.8.2/mongodb-driver-core-4.8.2.jar,https://repo1.maven.org/maven2/org/mongodb/bson-record-codec/4.8.2/bson-record-codec-4.8.2.jar \
+  --jars https://repo1.maven.org/maven2/org/mongodb/spark/mongo-spark-connector_2.12/10.2.2/mongo-spark-connector_2.12-10.2.2.jar \
   local:///workspace/pyspark/$PYSPARK_CODE_NAME
 "
 
