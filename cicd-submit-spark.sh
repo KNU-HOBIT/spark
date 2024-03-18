@@ -26,7 +26,7 @@ SPARK_SUBMIT_CMD="
 $SPARK_HOME/bin/spark-submit \
   --master k8s://$K8S_CLUSTER_ADDRESS \
   --name $SPARK_JOB_NAME \
-  --deploy-mode cluster \
+  --conf "spark.submit.deployMode=cluster" \
   --num-executors $NUM_EXECUTORS \
   --executor-cores $EXECUTOR_CORES \
   --executor-memory $EXECUTOR_MEMORY \
