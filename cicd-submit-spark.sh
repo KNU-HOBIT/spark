@@ -13,7 +13,6 @@ EXECUTOR_CORES=$(jq -r '.EXECUTOR_CORES' $CONFIG_FILE)
 EXECUTOR_MEMORY=$(jq -r '.EXECUTOR_MEMORY' $CONFIG_FILE)
 SERVICEACCOUNT_NAME=$(jq -r '.SERVICEACCOUNT_NAME' $CONFIG_FILE)
 PYSPARK_CODE_NAME=$(jq -r '.PYSPARK_CODE_NAME' $CONFIG_FILE)
-K8S_INTERNAL_MONGODB_URL=$(jq -r '.K8S_INTERNAL_MONGODB_URL' $CONFIG_FILE)
 
 # JAR_URLS 배열 읽기 & 배열을 쉼표로 구분된 문자열로 변환
 readarray -t JAR_URLS < <(jq -r '.JAR_URLS[]' $CONFIG_FILE)
@@ -38,7 +37,7 @@ $SPARK_HOME/bin/spark-submit \
   --conf spark.kubernetes.container.image=$FULL_IMAGE_PATH \
   --conf spark.kubernetes.authenticate.driver.serviceAccountName=$SERVICEACCOUNT_NAME \
   --jars $JARS \
-  local:///workspace/pyspark/$PYSPARK_CODE_NAME --mongo_url $K8S_INTERNAL_MONGODB_URL --mode cluster
+  local:///workspace/pyspark/$PYSPARK_CODE_NAME --config $CONFIG_FILE --mode cluster
 "
 
 # --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2
