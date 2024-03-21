@@ -62,7 +62,7 @@ jobs:
           username: ${{ secrets.SCOUTER01_SSH_USERNAME }}
           key: ${{ secrets.YUSU_SSH_KEY }}
           port: ${{ secrets.SCOUTER01_SSH_PORT }}
-          source: "config.json,cicd-submit-spark.sh"
+          source: "config.json,cluster-submit.sh"
           target: ${{ steps.config-values.outputs.target_dir }}
           debug: "true"
 
