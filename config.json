@@ -1,7 +1,7 @@
 {
     "SPARK_JOB_NAME" : "test",
     "K8S_CLUSTER_ADDRESS" : "https://155.230.34.51:6443",
-    "NUM_EXECUTORS" : 3,
+    "NUM_EXECUTORS" : 6,
     "EXECUTOR_CORES" : 4,
     "EXECUTOR_MEMORY" : "10G",
     "SERVICEACCOUNT_NAME" : "spark",
@@ -19,6 +19,11 @@
       ],
     "K8S_INTERNAL_MONGODB_URL" : "mongodb://adminuser:password123@mongo-nodeport-svc.mongodb/",
     "EXTERNAL_MONGODB_URL" : "mongodb://adminuser:password123@155.230.34.51:32323/",
+
     "MONGODB_DATABASE_NAME" : "test_database",
-    "MONGODB_COLLECTION_NAME" : "test_collection"
+    "MONGODB_COLLECTION_NAME" : "test_collection",
+
+    "EXTERNAL_INFLUXDB_URL" : "http://155.230.34.51:32145",
+    "K8S_INTERNAL_INFLUXDB_URL" : "http://influxdb-influxdb2.influxdb:80",
+    "INFLUXDB_TOKEN" : "mat0Zu_uCrONU-pQ67KaZbPTvh5O-rMKU7f9YLnPiX0NvNccLLzarfrv7OLY9EHEWCIRaAxow5LIEbjPrC7I_g=="
 }

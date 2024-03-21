@@ -77,7 +77,7 @@ jobs:
             cd ${{ steps.config-values.outputs.target_dir }}
             pwd
             ls
-            chmod +x ./cicd-submit-spark.sh
-            ./cicd-submit-spark.sh ${{ steps.docker-values.outputs.full_image_path }}
+            chmod +x ./cluster-submit.sh
+            ./cluster-submit.sh ${{ steps.docker-values.outputs.full_image_path }}
             cd ..
             rm -rf ${{ steps.config-values.outputs.target_dir }}

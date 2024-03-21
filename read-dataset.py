@@ -30,57 +30,24 @@ if args.mode == 'cluster' and not args.image:
 # config.json 파일 읽기
 with open(args.config, 'r') as f:
     config = json.load(f)
-    
-# 변수 초기화
-SPARK_HOME = config['SPARK_HOME']
-K8S_CLUSTER_ADDRESS = config['K8S_CLUSTER_ADDRESS']
-SPARK_JOB_NAME = config['SPARK_JOB_NAME']
-NUM_EXECUTORS = config['NUM_EXECUTORS']
-EXECUTOR_CORES = config['EXECUTOR_CORES']
-EXECUTOR_MEMORY = config['EXECUTOR_MEMORY']
-SERVICEACCOUNT_NAME = config['SERVICEACCOUNT_NAME']
-PYSPARK_CODE_NAME = config['PYSPARK_CODE_NAME']
 
-# --mode가 'cluster'일 경우 --image를 사용하여 FULL_IMAGE_PATH 초기화
-if args.mode == 'cluster':
-    FULL_IMAGE_PATH = args.image
-    
+print(f"Running in {'local' if args.mode == 'local' else 'cluster'} mode")
+
 # JAR_URLS 배열을 쉼표로 구분된 문자열로 변환
 JAR_URLS = config['JAR_URLS']
 JARS = ",".join(JAR_URLS)
+
+# SparkSession 생성
+spark = SparkSession.builder \
+        .appName(config['SPARK_JOB_NAME']) \
+        .config("spark.jars", JARS) \
+        .getOrCreate()
 
 # --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2
 # 를 사용했지만, 이 옵션은 위의 라이브러리 + 종속 라이브러리들을 드라이버 노드에만, 자동으로 다운로드함.
 #
 # 하지만, 워커노드에는 위 라이브러리들이 할당되지 않아, 코드가 cluster모드로 k8s에 제출되어도 작동하지않는 문제점이 있었음
 # --jars <URL1>,<URL2>,<URL3>,... 를 이용하여 메이블 레포 링크를 걸어 마스터노드+워커노드 전부 jar 라이브러리를 할당할 수 있다.
-
-# MongoDB URL 선택
-if args.mode == 'local':
-    mongo_url = config['EXTERNAL_MONGODB_URL']
-else:
-    mongo_url = config['K8S_INTERNAL_MONGODB_URL']
-    
-print(f"Running in {'local' if args.mode == 'local' else 'cluster'} mode")
-
-
-# SparkSession 생성
-if args.mode == 'local':
-    spark = SparkSession.builder \
-        .appName("local") \
-        .config("spark.jars", JARS) \
-        .getOrCreate()
-else:
-    spark = SparkSession.builder \
-        .appName(SPARK_JOB_NAME) \
-        .master(f"k8s://{K8S_CLUSTER_ADDRESS}") \
-        .config("spark.executor.instances", NUM_EXECUTORS) \
-        .config("spark.executor.cores", EXECUTOR_CORES) \
-        .config("spark.executor.memory", EXECUTOR_MEMORY) \
-        .config("spark.kubernetes.container.image", FULL_IMAGE_PATH) \
-        .config("spark.kubernetes.authenticate.driver.serviceAccountName", SERVICEACCOUNT_NAME) \
-        .config("spark.jars", JARS) \
-        .getOrCreate()
 
 spark.sparkContext.setLogLevel('WARN')
 
@@ -173,6 +140,12 @@ print("="*100)
 # print(df.show(10))
 # print("="*100)
 
+# # MongoDB URL 선택
+# if args.mode == 'local':
+#     mongo_url = config['EXTERNAL_MONGODB_URL']
+# else:
+#     mongo_url = config['K8S_INTERNAL_MONGODB_URL']
+
 # # MongoDB에 데이터 쓰기
 # print("8. MongoDB에 데이터 쓰기")
 # df.write.format("mongodb") \
@@ -228,14 +201,17 @@ def end_timer():
     print(f"{elapsed_time:.6f}초")
     print("="*100)
 
-import influxdb_client, os, time
+import influxdb_client, time
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 
-token = os.environ.get("INFLUXDB_TOKEN")
+token = config['INFLUXDB_TOKEN']
 org = "influxdata"
-url = "http://155.230.34.51:32145"
-
+if args.mode == 'local':
+    url = config['EXTERNAL_INFLUXDB_URL']
+else:
+    url = config['K8S_INTERNAL_INFLUXDB_URL']
+    
 bucket="kafka_test_bucket"
 
 ####################################################################################################
