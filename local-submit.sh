@@ -11,11 +11,12 @@ export PYSPARK_WORKER_PYTHON="$LOCAL_ENV_PYTHON"
 readarray -t JAR_URLS < <(jq -r '.JAR_URLS[]' $CONFIG_FILE)
 JARS=$(IFS=,; echo "${JAR_URLS[*]}")
 
-spark-submit \
-    --jars $JARS \
-    read-dataset.py --config $CONFIG_FILE --mode local
-
-
+# 로컬 모드
+spark-submit read-dataset.py --config $CONFIG_FILE --mode local
+# # 클러스터 모드
+# spark-submit read-dataset.py --config $CONFIG_FILE --mode cluster --image 2024-03-19.03-10-29
+    
+    
 # --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2
 # 를 사용했지만, 이 옵션은 위의 라이브러리 + 종속 라이브러리들을 드라이버 노드에만, 자동으로 다운로드함.
 #
