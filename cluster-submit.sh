@@ -14,6 +14,12 @@ EXECUTOR_MEMORY=$(jq -r '.EXECUTOR_MEMORY' $CONFIG_FILE)
 SERVICEACCOUNT_NAME=$(jq -r '.SERVICEACCOUNT_NAME' $CONFIG_FILE)
 PYSPARK_CODE_NAME=$(jq -r '.PYSPARK_CODE_NAME' $CONFIG_FILE)
 
+# JAR_URLS 배열 읽기
+readarray -t JAR_URLS < <(jq -r '.JAR_URLS[]' $CONFIG_FILE)
+
+# 배열을 쉼표로 구분된 문자열로 변환
+JARS=$(IFS=,; echo "${JAR_URLS[*]}")
+
 # Spark job 제출 명령어를 변수에 저장
 SPARK_SUBMIT_CMD="
 $SPARK_HOME/bin/spark-submit \
@@ -25,6 +31,7 @@ $SPARK_HOME/bin/spark-submit \
   --executor-memory $EXECUTOR_MEMORY \
   --conf spark.kubernetes.container.image=$FULL_IMAGE_PATH \
   --conf spark.kubernetes.authenticate.driver.serviceAccountName=$SERVICEACCOUNT_NAME \
+  --jars $JARS \
   local:///workspace/pyspark/$PYSPARK_CODE_NAME --config $CONFIG_FILE --mode cluster --image $FULL_IMAGE_PATH
 "
 # --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2

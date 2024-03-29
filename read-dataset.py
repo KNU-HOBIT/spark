@@ -82,14 +82,10 @@ else:
 
 print(f"Running in {'local' if args.mode == 'local' else 'cluster'} mode")
 
-# JAR_URLS 배열을 쉼표로 구분된 문자열로 변환
-JAR_URLS = config['JAR_URLS']
-JARS = ",".join(JAR_URLS)
 
 # SparkSession 생성
 spark = SparkSession.builder \
         .appName(config['SPARK_JOB_NAME']) \
-        .config("spark.jars", JARS) \
         .getOrCreate()
 
 # --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2
@@ -214,6 +210,9 @@ else:
 
 # MongoDB에 데이터 쓰기
 print("8. MongoDB에 데이터 쓰기")
+print(mongo_url)
+print(config["MONGODB_DATABASE_NAME"])
+print(config["MONGODB_COLLECTION_NAME"])
 df.write.format("mongodb") \
     .option("spark.mongodb.write.connection.uri", mongo_url) \
     .option("spark.mongodb.write.database", config["MONGODB_DATABASE_NAME"]) \
