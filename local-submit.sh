@@ -3,19 +3,16 @@ CONFIG_FILE="./config.json"
 LOCAL_ENV_PYTHON=$(jq -r '.LOCAL_ENV_PYTHON' $CONFIG_FILE)
 
 # 전체 설정, 드라이버, 워커 개별 설정
+# $ conda activate myenv
+# $ python -V # 출력: 3.9.2
+# $ which python # 출력: /path/to/myenv/python == LOCAL_ENV_PYTHON
+
 export PYSPARK_PYTHON="$LOCAL_ENV_PYTHON"
 export PYSPARK_DRIVER_PYTHON="$LOCAL_ENV_PYTHON"
 export PYSPARK_WORKER_PYTHON="$LOCAL_ENV_PYTHON"
 
-# JAR_URLS 배열 읽기 & 배열을 쉼표로 구분된 문자열로 변환
-readarray -t JAR_URLS < <(jq -r '.JAR_URLS[]' $CONFIG_FILE)
-JARS=$(IFS=,; echo "${JAR_URLS[*]}")
-
-# 로컬 모드
+# 로컬 모드(개발)
 spark-submit read-dataset.py --config $CONFIG_FILE --mode local
-# # 클러스터 모드
-# spark-submit read-dataset.py --config $CONFIG_FILE --mode cluster --image 2024-03-19.03-10-29
-    
     
 # --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2
 # 를 사용했지만, 이 옵션은 위의 라이브러리 + 종속 라이브러리들을 드라이버 노드에만, 자동으로 다운로드함.
