@@ -151,12 +151,14 @@ boston_columns = [
 boston_pdf = pd.DataFrame(data, columns=boston_columns)
 boston_pdf['price'] = target
 
+start_timer("START!")
 # pandas DataFrame을 Spark DataFrame으로 변환
 print("3. pandas DataFrame을 Spark DataFrame으로 변환")
 boston_sdf = spark.createDataFrame(boston_pdf)
 print("="*100)
 print(boston_sdf.show(10))
 print("="*100)
+
 ### Feature Vectorization 적용하고 학습과 테스트 데이터 세트로 분할
 print("4. Feature Vectorization 적용하고 학습과 테스트 데이터 세트로 분할")
 from pyspark.ml.feature import VectorAssembler
@@ -348,7 +350,7 @@ print(ftr_importances)
 print("="*100)
 
 
-
+end_timer()
 
 # # 저장할 디렉토리 경로 설정
 # directory = './plots/'
