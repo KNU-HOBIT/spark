@@ -443,6 +443,9 @@ df_loaded = spark.read.format("mongodb") \
     .option("spark.mongodb.read.connection.uri", mongo_url) \
     .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
     .option("spark.mongodb.read.collection", "transport") \
+    .option("spark.mongodb.read.partitioner", "SamplePartitioner") \
+    .option("spark.mongodb.read.partitionerOptions.partitionSizeMB", "64") \
+    .option("spark.mongodb.read.partitionerOptions.samplesPerPartition", "10") \
     .load()
 end_timer()
 print("="*100)
@@ -465,14 +468,12 @@ from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.regression import LinearRegression
 from pyspark.ml.evaluation import RegressionEvaluator
 
-
-# 특성 선택 및 벡터 생성
 start_timer("11. 특성 선택 및 벡터 생성")
 feature_columns = ['gps_lat', 'gps_lon', 'speed', 'move_distance', 'move_time']  # 예측에 사용할 특성
 assembler = VectorAssembler(inputCols=feature_columns, outputCol="features")
 data = assembler.transform(df_loaded)
 end_timer()
-# 'weight'는 레이블로 사용
+
 start_timer("12. 'weight'는 레이블로 사용")
 data = data.withColumnRenamed("weight", "label")
 end_timer()
