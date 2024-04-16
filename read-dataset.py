@@ -132,225 +132,230 @@ print("="*100)
 ###########################  Kafka  #####################################
 #########################################################################
 
+#########################################################################
+###########################  Spark Example  #############################
+#########################################################################
+
 
 # 원본 데이터 URL에서 보스턴 주택 가격 데이터 세트를 로드
-print("1. 원본 데이터 URL에서 보스턴 주택 가격 데이터 세트를 로드")
-data_url = "http://lib.stat.cmu.edu/datasets/boston"
-raw_df = pd.read_csv(data_url, sep="\s+", skiprows=22, header=None)
-data = np.hstack([raw_df.values[::2, :], raw_df.values[1::2, :2]])
-target = raw_df.values[1::2, 2]
+# print("1. 원본 데이터 URL에서 보스턴 주택 가격 데이터 세트를 로드")
+# data_url = "http://lib.stat.cmu.edu/datasets/boston"
+# raw_df = pd.read_csv(data_url, sep="\s+", skiprows=22, header=None)
+# data = np.hstack([raw_df.values[::2, :], raw_df.values[1::2, :2]])
+# target = raw_df.values[1::2, 2]
 
-# 보스턴 주택 가격 데이터 세트의 컬럼 이름 정의
-print("2. 보스턴 주택 가격 데이터 세트의 컬럼 이름 정의")
-boston_columns = [
-    "CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD",
-    "TAX", "PTRATIO", "B", "LSTAT"
-]
+# # 보스턴 주택 가격 데이터 세트의 컬럼 이름 정의
+# print("2. 보스턴 주택 가격 데이터 세트의 컬럼 이름 정의")
+# boston_columns = [
+#     "CRIM", "ZN", "INDUS", "CHAS", "NOX", "RM", "AGE", "DIS", "RAD",
+#     "TAX", "PTRATIO", "B", "LSTAT"
+# ]
 
-# 데이터와 타겟을 결합하여 pandas DataFrame 생성
-boston_pdf = pd.DataFrame(data, columns=boston_columns)
-boston_pdf['price'] = target
+# # 데이터와 타겟을 결합하여 pandas DataFrame 생성
+# boston_pdf = pd.DataFrame(data, columns=boston_columns)
+# boston_pdf['price'] = target
 
-start_timer("START!")
-# pandas DataFrame을 Spark DataFrame으로 변환
-print("3. pandas DataFrame을 Spark DataFrame으로 변환")
-boston_sdf = spark.createDataFrame(boston_pdf)
-print("="*100)
-print(boston_sdf.show(10))
-print("="*100)
+# start_timer("START!")
+# # pandas DataFrame을 Spark DataFrame으로 변환
+# print("3. pandas DataFrame을 Spark DataFrame으로 변환")
+# boston_sdf = spark.createDataFrame(boston_pdf)
+# print("="*100)
+# print(boston_sdf.show(10))
+# print("="*100)
 
-### Feature Vectorization 적용하고 학습과 테스트 데이터 세트로 분할
-print("4. Feature Vectorization 적용하고 학습과 테스트 데이터 세트로 분할")
-from pyspark.ml.feature import VectorAssembler
+# ### Feature Vectorization 적용하고 학습과 테스트 데이터 세트로 분할
+# print("4. Feature Vectorization 적용하고 학습과 테스트 데이터 세트로 분할")
+# from pyspark.ml.feature import VectorAssembler
 
-vector_assembler = VectorAssembler(inputCols=boston_columns, outputCol='features')
-boston_sdf_vectorized = vector_assembler.transform(boston_sdf)
-train_sdf, test_sdf = boston_sdf_vectorized.randomSplit([0.7, 0.3], seed=2021)
-print("="*100)
-train_sdf.limit(10)
-print("="*100)
-### LinearRegression 학습, 예측, 평가 수행. 
-print("5. LinearRegression 학습, 예측, 평가 수행.")
-from pyspark.ml.regression import LinearRegression
+# vector_assembler = VectorAssembler(inputCols=boston_columns, outputCol='features')
+# boston_sdf_vectorized = vector_assembler.transform(boston_sdf)
+# train_sdf, test_sdf = boston_sdf_vectorized.randomSplit([0.7, 0.3], seed=2021)
+# print("="*100)
+# train_sdf.limit(10)
+# print("="*100)
+# ### LinearRegression 학습, 예측, 평가 수행. 
+# print("5. LinearRegression 학습, 예측, 평가 수행.")
+# from pyspark.ml.regression import LinearRegression
 
-lr = LinearRegression(featuresCol='features', labelCol='price', 
-                         maxIter=100, regParam=0)
-lr_model = lr.fit(train_sdf)
-lr_predictions = lr_model.transform(test_sdf)
-print("="*100)
-lr_predictions.limit(10)
-print("="*100)
+# lr = LinearRegression(featuresCol='features', labelCol='price', 
+#                          maxIter=100, regParam=0)
+# lr_model = lr.fit(train_sdf)
+# lr_predictions = lr_model.transform(test_sdf)
+# print("="*100)
+# lr_predictions.limit(10)
+# print("="*100)
 
-# Ridge, Lasso, ElasticNet 학습,예측 테스트를 위해서 함수 생성. 
-print("6. Ridge, Lasso, ElasticNet 학습,예측 테스트를 위해서 함수 생성. ")
-def do_train_predict(lr_estimator, train_sdf, test_sdf):
-    lr_model = lr_estimator.fit(train_sdf)
-    predictions = lr_model.transform(test_sdf)
-    return lr_model, predictions
+# # Ridge, Lasso, ElasticNet 학습,예측 테스트를 위해서 함수 생성. 
+# print("6. Ridge, Lasso, ElasticNet 학습,예측 테스트를 위해서 함수 생성. ")
+# def do_train_predict(lr_estimator, train_sdf, test_sdf):
+#     lr_model = lr_estimator.fit(train_sdf)
+#     predictions = lr_model.transform(test_sdf)
+#     return lr_model, predictions
 
-lr_model, lr_predictions = do_train_predict(lr, train_sdf, test_sdf)
-print("="*100)
+# lr_model, lr_predictions = do_train_predict(lr, train_sdf, test_sdf)
+# print("="*100)
 
-from pyspark.ml.evaluation import RegressionEvaluator
+# from pyspark.ml.evaluation import RegressionEvaluator
 
-def get_reg_eval(predictions):
-    mse_eval = RegressionEvaluator(labelCol='price', predictionCol='prediction', metricName='mse')
-    rmse_eval = RegressionEvaluator(labelCol='price', predictionCol='prediction', metricName='rmse')
-    r2_eval = RegressionEvaluator(labelCol='price', predictionCol='prediction', metricName='r2')
+# def get_reg_eval(predictions):
+#     mse_eval = RegressionEvaluator(labelCol='price', predictionCol='prediction', metricName='mse')
+#     rmse_eval = RegressionEvaluator(labelCol='price', predictionCol='prediction', metricName='rmse')
+#     r2_eval = RegressionEvaluator(labelCol='price', predictionCol='prediction', metricName='r2')
 
-    print('mse:', mse_eval.evaluate(predictions), 'rmse:', rmse_eval.evaluate(predictions), 'r2:', r2_eval.evaluate(predictions))
+#     print('mse:', mse_eval.evaluate(predictions), 'rmse:', rmse_eval.evaluate(predictions), 'r2:', r2_eval.evaluate(predictions))
     
-get_reg_eval(lr_predictions)
-print("="*100)
+# get_reg_eval(lr_predictions)
+# print("="*100)
 
 
-# LinearRegression은 학습 데이터를 기본으로 정규화 scaling변환. standardization=True가 기본값.
-print("7. LinearRegression은 학습 데이터를 기본으로 정규화 scaling변환. standardization=True가 기본값.") 
-lr_model.extractParamMap()
+# # LinearRegression은 학습 데이터를 기본으로 정규화 scaling변환. standardization=True가 기본값.
+# print("7. LinearRegression은 학습 데이터를 기본으로 정규화 scaling변환. standardization=True가 기본값.") 
+# lr_model.extractParamMap()
 
 
-# 학습 데이터를 학습전에 정규환 변환 적용하지 않음. 
-lr = LinearRegression(featuresCol='features', labelCol='price', 
-                         maxIter=100, regParam=0, standardization=False)
-lr_model, lr_predictions = do_train_predict(lr, train_sdf, test_sdf)
-get_reg_eval(lr_predictions)
-print("="*100)
+# # 학습 데이터를 학습전에 정규환 변환 적용하지 않음. 
+# lr = LinearRegression(featuresCol='features', labelCol='price', 
+#                          maxIter=100, regParam=0, standardization=False)
+# lr_model, lr_predictions = do_train_predict(lr, train_sdf, test_sdf)
+# get_reg_eval(lr_predictions)
+# print("="*100)
 
 
 
-# linear regression의 회귀계수와 절편은 각각 EstimatorModel의 coefficients와 intercept에서 확인 
-print('8. linear regression의 회귀계수와 절편은 각각 EstimatorModel의 coefficients와 intercept에서 확인 ')
-print('회귀 계수:', lr_model.coefficients)
-print('회귀 절편:', lr_model.intercept)
-coeff = pd.Series(data=lr_model.coefficients, index=boston_columns)
-print(coeff.sort_values(ascending=False))
+# # linear regression의 회귀계수와 절편은 각각 EstimatorModel의 coefficients와 intercept에서 확인 
+# print('8. linear regression의 회귀계수와 절편은 각각 EstimatorModel의 coefficients와 intercept에서 확인 ')
+# print('회귀 계수:', lr_model.coefficients)
+# print('회귀 절편:', lr_model.intercept)
+# coeff = pd.Series(data=lr_model.coefficients, index=boston_columns)
+# print(coeff.sort_values(ascending=False))
 
-import matplotlib.pyplot as plt
-import seaborn as sns
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 
-def get_coefficient(coefficients, columns):
-    coeff = pd.Series(data=coefficients, index=columns).sort_values(ascending=False)
-    print(coeff)
-    # sns.barplot(x=coeff.values, y=coeff.index)
-    # plt.show()
-get_coefficient(lr_model.coefficients, boston_columns)
-print("="*100)
-
-
-print("####규제 선형회귀 적용")
-print("regParam = 0, elasticNetParam = 0 => 무규제 선형회귀")
-print("regParam > 0, elasticNetParam = 0 => Ridge(L2 규제)")
-print("regParam > 0, elasticNetParam = 1 => Lasso(L1 규제)")
-print("regParam > 0, elasticNetParam = (0 ~ 1) => ElasticNet")
-#### 규제 선형회귀 적용
-# regParam = 0, elasticNetParam = 0 => 무규제 선형회귀
-# regParam > 0, elasticNetParam = 0 => Ridge(L2 규제)
-# regParam > 0, elasticNetParam = 1 => Lasso(L1 규제)
-# regParam > 0, elasticNetParam = (0 ~ 1) => ElasticNet
-
-def do_train_predict(lr_estimator, train_sdf, test_sdf):
-    lr_model = lr_estimator.fit(train_sdf)
-    predictions = lr_model.transform(test_sdf)
-    return lr_model, predictions
-
-print("regParam=5, elasticNetParam=0으로 alpha값이 5인 Ridge Estimator 생성. ")
-from pyspark.ml.regression import LinearRegression
-
-# regParam=5, elasticNetParam=0으로 alpha값이 5인 Ridge Estimator 생성. 
-ridge = LinearRegression(featuresCol='features', labelCol='price', 
-                         maxIter=100, regParam=5, elasticNetParam=0)
-
-ridge_model, ridge_predictions = do_train_predict(ridge, train_sdf, test_sdf)
-get_reg_eval(ridge_predictions)
-get_coefficient(ridge_model.coefficients, boston_columns)
-# mse: 21.564913322698093 rmse: 4.643803755834014 r2: 0.7383398763030963
-# mse: 23.721435164891943 rmse: 4.8704656004217854 r2: 0.7121734937380622
-print("="*100)
-print("regParam=0.01, elasticNetParam=1으로 alpha값이 0.1인 Lasso Estimator 생성. ")
-from pyspark.ml.regression import LinearRegression
-
-# regParam=0.01, elasticNetParam=1으로 alpha값이 0.1인 Lasso Estimator 생성. 
-lasso = LinearRegression(featuresCol='features', labelCol='price', 
-                         maxIter=100, regParam=0.1, elasticNetParam=1)
-
-lasso_model, lasso_predictions = do_train_predict(lasso, train_sdf, test_sdf)
-get_reg_eval(lasso_predictions)
-get_coefficient(lasso_model.coefficients, boston_columns)
-print("="*100)
-
-print("regParam=20, elasticNetParam=0.1으로 a+b=20, L1 ratio=0.1임. a/(a+b) = 2/20, L1 alpha값이 2, L2 alpha값이 18인 ElasticNet Estimator 생성. ")
-from pyspark.ml.regression import LinearRegression
-
-# regParam=20, elasticNetParam=0.1으로 a+b=20, L1 ratio=0.1임. a/(a+b) = 2/20, L1 alpha값이 2, L2 alpha값이 18인 ElasticNet Estimator 생성. 
-elastic_net = LinearRegression(featuresCol='features', labelCol='price', 
-                         maxIter=100, regParam=20, elasticNetParam=0.1)
-
-elastic_net_model, elastic_net_predictions = do_train_predict(elastic_net, train_sdf, test_sdf)
-get_reg_eval(elastic_net_predictions)
-get_coefficient(elastic_net_model.coefficients, boston_columns)
-print("="*100)
-
-print("전체 컬럼에 Standard Scaler 적용. scaling은 vectorized된 feature에만 가능. feature vectorization 적용후 standard scaling 적용. ")
-from pyspark.ml.feature import StandardScaler
-from pyspark.ml.feature import VectorAssembler
-
-# 전체 컬럼에 Standard Scaler 적용. scaling은 vectorized된 feature에만 가능. feature vectorization 적용후 standard scaling 적용. 
-vec_assembler = VectorAssembler(inputCols=boston_columns, outputCol='features')
-standard_scaler = StandardScaler(inputCol='features', outputCol='scaled_features')
-
-boston_sdf_vectorized = vec_assembler.transform(boston_sdf)
-boston_sdf_vect_scaled = standard_scaler.fit(boston_sdf_vectorized).transform(boston_sdf_vectorized)
-
-boston_sdf_vect_scaled.limit(10)
-print("="*100)
-
-print("feature vectorization->scaling이 적용된 데이터 세트를 학습과 테스트로 분리 ")
-train_sdf_scaled, test_sdf_scaled = boston_sdf_vect_scaled.randomSplit([0.7, 0.3], seed=2021)
-
-print("featuresCol이 features가 아닌 scaled_features가 되어야함. ")
-ridge_scale = LinearRegression(featuresCol='scaled_features', labelCol='price', 
-                         maxIter=100, regParam=5, elasticNetParam=0, standardization=False)
-
-# scaled된 학습과 테스트 데이터 세트 입력하여 lasso 학습/예측/평가
-print("scaled된 학습과 테스트 데이터 세트 입력하여 lasso 학습/예측/평가")
-ridge_model, ridge_predictions = do_train_predict(ridge_scale, train_sdf_scaled, test_sdf_scaled)
-get_reg_eval(ridge_predictions)
-get_coefficient(ridge_model.coefficients, boston_columns)
-print("="*100)
-#mse: 21.564913322698093 rmse: 4.643803755834014 r2: 0.7383398763030963
+# def get_coefficient(coefficients, columns):
+#     coeff = pd.Series(data=coefficients, index=columns).sort_values(ascending=False)
+#     print(coeff)
+#     # sns.barplot(x=coeff.values, y=coeff.index)
+#     # plt.show()
+# get_coefficient(lr_model.coefficients, boston_columns)
+# print("="*100)
 
 
-### 회귀 트리 적용
-# * DecisionTreeRegressor, RandomForestRegressor, GBTRegressor 에서 RandomForestRegressor만 적용해봄.
-print("### 회귀 트리 적용")
-print("* DecisionTreeRegressor, RandomForestRegressor, GBTRegressor 에서 RandomForestRegressor만 적용해봄.")
+# print("####규제 선형회귀 적용")
+# print("regParam = 0, elasticNetParam = 0 => 무규제 선형회귀")
+# print("regParam > 0, elasticNetParam = 0 => Ridge(L2 규제)")
+# print("regParam > 0, elasticNetParam = 1 => Lasso(L1 규제)")
+# print("regParam > 0, elasticNetParam = (0 ~ 1) => ElasticNet")
+# #### 규제 선형회귀 적용
+# # regParam = 0, elasticNetParam = 0 => 무규제 선형회귀
+# # regParam > 0, elasticNetParam = 0 => Ridge(L2 규제)
+# # regParam > 0, elasticNetParam = 1 => Lasso(L1 규제)
+# # regParam > 0, elasticNetParam = (0 ~ 1) => ElasticNet
+
+# def do_train_predict(lr_estimator, train_sdf, test_sdf):
+#     lr_model = lr_estimator.fit(train_sdf)
+#     predictions = lr_model.transform(test_sdf)
+#     return lr_model, predictions
+
+# print("regParam=5, elasticNetParam=0으로 alpha값이 5인 Ridge Estimator 생성. ")
+# from pyspark.ml.regression import LinearRegression
+
+# # regParam=5, elasticNetParam=0으로 alpha값이 5인 Ridge Estimator 생성. 
+# ridge = LinearRegression(featuresCol='features', labelCol='price', 
+#                          maxIter=100, regParam=5, elasticNetParam=0)
+
+# ridge_model, ridge_predictions = do_train_predict(ridge, train_sdf, test_sdf)
+# get_reg_eval(ridge_predictions)
+# get_coefficient(ridge_model.coefficients, boston_columns)
+# # mse: 21.564913322698093 rmse: 4.643803755834014 r2: 0.7383398763030963
+# # mse: 23.721435164891943 rmse: 4.8704656004217854 r2: 0.7121734937380622
+# print("="*100)
+# print("regParam=0.01, elasticNetParam=1으로 alpha값이 0.1인 Lasso Estimator 생성. ")
+# from pyspark.ml.regression import LinearRegression
+
+# # regParam=0.01, elasticNetParam=1으로 alpha값이 0.1인 Lasso Estimator 생성. 
+# lasso = LinearRegression(featuresCol='features', labelCol='price', 
+#                          maxIter=100, regParam=0.1, elasticNetParam=1)
+
+# lasso_model, lasso_predictions = do_train_predict(lasso, train_sdf, test_sdf)
+# get_reg_eval(lasso_predictions)
+# get_coefficient(lasso_model.coefficients, boston_columns)
+# print("="*100)
+
+# print("regParam=20, elasticNetParam=0.1으로 a+b=20, L1 ratio=0.1임. a/(a+b) = 2/20, L1 alpha값이 2, L2 alpha값이 18인 ElasticNet Estimator 생성. ")
+# from pyspark.ml.regression import LinearRegression
+
+# # regParam=20, elasticNetParam=0.1으로 a+b=20, L1 ratio=0.1임. a/(a+b) = 2/20, L1 alpha값이 2, L2 alpha값이 18인 ElasticNet Estimator 생성. 
+# elastic_net = LinearRegression(featuresCol='features', labelCol='price', 
+#                          maxIter=100, regParam=20, elasticNetParam=0.1)
+
+# elastic_net_model, elastic_net_predictions = do_train_predict(elastic_net, train_sdf, test_sdf)
+# get_reg_eval(elastic_net_predictions)
+# get_coefficient(elastic_net_model.coefficients, boston_columns)
+# print("="*100)
+
+# print("전체 컬럼에 Standard Scaler 적용. scaling은 vectorized된 feature에만 가능. feature vectorization 적용후 standard scaling 적용. ")
+# from pyspark.ml.feature import StandardScaler
+# from pyspark.ml.feature import VectorAssembler
+
+# # 전체 컬럼에 Standard Scaler 적용. scaling은 vectorized된 feature에만 가능. feature vectorization 적용후 standard scaling 적용. 
+# vec_assembler = VectorAssembler(inputCols=boston_columns, outputCol='features')
+# standard_scaler = StandardScaler(inputCol='features', outputCol='scaled_features')
+
+# boston_sdf_vectorized = vec_assembler.transform(boston_sdf)
+# boston_sdf_vect_scaled = standard_scaler.fit(boston_sdf_vectorized).transform(boston_sdf_vectorized)
+
+# boston_sdf_vect_scaled.limit(10)
+# print("="*100)
+
+# print("feature vectorization->scaling이 적용된 데이터 세트를 학습과 테스트로 분리 ")
+# train_sdf_scaled, test_sdf_scaled = boston_sdf_vect_scaled.randomSplit([0.7, 0.3], seed=2021)
+
+# print("featuresCol이 features가 아닌 scaled_features가 되어야함. ")
+# ridge_scale = LinearRegression(featuresCol='scaled_features', labelCol='price', 
+#                          maxIter=100, regParam=5, elasticNetParam=0, standardization=False)
+
+# # scaled된 학습과 테스트 데이터 세트 입력하여 lasso 학습/예측/평가
+# print("scaled된 학습과 테스트 데이터 세트 입력하여 lasso 학습/예측/평가")
+# ridge_model, ridge_predictions = do_train_predict(ridge_scale, train_sdf_scaled, test_sdf_scaled)
+# get_reg_eval(ridge_predictions)
+# get_coefficient(ridge_model.coefficients, boston_columns)
+# print("="*100)
+# #mse: 21.564913322698093 rmse: 4.643803755834014 r2: 0.7383398763030963
 
 
-from pyspark.ml.regression import RandomForestRegressor
-
-rf = RandomForestRegressor(featuresCol='features', labelCol='price', 
-                               maxDepth=5, numTrees=10)
-rf_model, rf_predictions = do_train_predict(rf, train_sdf, test_sdf)
-get_reg_eval(rf_predictions)
-print("="*100)
+# ### 회귀 트리 적용
+# # * DecisionTreeRegressor, RandomForestRegressor, GBTRegressor 에서 RandomForestRegressor만 적용해봄.
+# print("### 회귀 트리 적용")
+# print("* DecisionTreeRegressor, RandomForestRegressor, GBTRegressor 에서 RandomForestRegressor만 적용해봄.")
 
 
-from pyspark.ml.linalg import DenseVector
-import matplotlib.pyplot as plt
-import seaborn as sns
+# from pyspark.ml.regression import RandomForestRegressor
+
+# rf = RandomForestRegressor(featuresCol='features', labelCol='price', 
+#                                maxDepth=5, numTrees=10)
+# rf_model, rf_predictions = do_train_predict(rf, train_sdf, test_sdf)
+# get_reg_eval(rf_predictions)
+# print("="*100)
 
 
-print("feature importance가 Sparse Vector이므로 Dense Vector로 변환.")
-rf_ftr_importances_list = list(DenseVector(rf_model.featureImportances))
-
-ftr_importances = pd.Series(data=rf_ftr_importances_list, index=boston_columns).sort_values(ascending=False)
-print(ftr_importances)
-# sns.barplot(x=ftr_importances.values, y=ftr_importances.index)
-# plt.show()
-print("="*100)
+# from pyspark.ml.linalg import DenseVector
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 
 
-end_timer()
+# print("feature importance가 Sparse Vector이므로 Dense Vector로 변환.")
+# rf_ftr_importances_list = list(DenseVector(rf_model.featureImportances))
+
+# ftr_importances = pd.Series(data=rf_ftr_importances_list, index=boston_columns).sort_values(ascending=False)
+# print(ftr_importances)
+# # sns.barplot(x=ftr_importances.values, y=ftr_importances.index)
+# # plt.show()
+# print("="*100)
+
+
+# end_timer()
+
 
 # # 저장할 디렉토리 경로 설정
 # directory = './plots/'
@@ -377,6 +382,9 @@ end_timer()
 # plt.savefig(os.path.join(directory, filename))
 # print("="*100)
 
+#########################################################################
+###########################  Spark Example  #############################
+#########################################################################
 
 ####################################################################################################
 ##################################     MongoDB Example      ########################################
@@ -426,21 +434,64 @@ end_timer()
 
 
     
-# # MongoDB에서 데이터 읽기
-# print("9. MongoDB에서 데이터 읽기")
+# MongoDB에서 데이터 읽기
+print("9. MongoDB에서 데이터 읽기")
 
-# df_loaded = spark.read.format("mongodb") \
-#     .option("spark.mongodb.read.connection.uri", mongo_url) \
-#     .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
-#     .option("spark.mongodb.read.collection", "transport") \
-#     .load()
-# print("="*100)
 
-# # 읽어온 데이터 출력
-# print("10. MongoDB에서 데이터 읽기")
-# df_loaded.show()
-# print("="*100)
+start_timer("MongoDB에서 데이터 읽기")
+df_loaded = spark.read.format("mongodb") \
+    .option("spark.mongodb.read.connection.uri", mongo_url) \
+    .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
+    .option("spark.mongodb.read.collection", "transport") \
+    .load()
+end_timer()
+print("="*100)
 
+# 읽어온 데이터 출력
+print("10. MongoDB에서 데이터 읽기")
+df_loaded.show()
+print("="*100)
+df_loaded.printSchema()
+print("="*100)
+
+def process_data(df):
+    agg_df = df.groupBy("eqp_id").avg("weight")
+    return agg_df
+start_timer("(eqp_id)별 평균 weight을 계산")
+result = process_data(df_loaded)
+end_timer()
+
+from pyspark.ml.feature import VectorAssembler
+from pyspark.ml.regression import LinearRegression
+from pyspark.ml.evaluation import RegressionEvaluator
+
+
+# 특성 선택 및 벡터 생성
+start_timer("11. 특성 선택 및 벡터 생성")
+feature_columns = ['gps_lat', 'gps_lon', 'speed', 'move_distance', 'move_time']  # 예측에 사용할 특성
+assembler = VectorAssembler(inputCols=feature_columns, outputCol="features")
+data = assembler.transform(df_loaded)
+end_timer()
+# 'weight'는 레이블로 사용
+start_timer("12. 'weight'는 레이블로 사용")
+data = data.withColumnRenamed("weight", "label")
+end_timer()
+
+start_timer("13. 데이터를 훈련 세트와 테스트 세트로 분할")
+train_data, test_data = data.randomSplit([0.8, 0.2], seed=42)
+end_timer()
+
+start_timer("14. 선형 회귀 모델을 학습")
+lr = LinearRegression(featuresCol="features", labelCol="label")
+model = lr.fit(train_data)
+end_timer()
+
+start_timer("15. 테스트 데이터를 사용하여 모델을 평가")
+predictions = model.transform(test_data)
+evaluator = RegressionEvaluator(labelCol="label", predictionCol="prediction", metricName="rmse")
+rmse = evaluator.evaluate(predictions)
+end_timer()
+print("Root Mean Squared Error (RMSE) on test data =", rmse)
 
 
 ####################################################################################################
