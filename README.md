@@ -118,3 +118,23 @@ Github Action을 이용해서,
         python3.10 -m venv myenv
         ```
    
+
+## HOW to DEPLOY
+
+### 로컬 모드(개발)
+> 현재 로컬 환경, 단일 서버에서 실행.
+
+`local-submit.sh`에서 다음과 같은 명령어로 작동.
+
+```
+spark-submit \
+    --jars $JARS \
+    read-dataset.py \
+    --config $CONFIG_FILE \
+    --mode local
+```
+- `CONFIG_FILE`에는 `config.json`의 경로. 
+- `JARS`에는 maven.repo에서 제공하는 JAR 라이브러리 다운로드 링크 List. 
+
+
+
