@@ -34,6 +34,9 @@ $SPARK_HOME/bin/spark-submit \
   --conf spark.dynamicAllocation.enabled=true \
   --conf spark.shuffle.service.enabled=true \
   --conf spark.sql.shuffle.partitions=3 \
+  --conf spark.shuffle.service.enabled=true
+  --conf spark.shuffle.service.port=7337
+  --conf spark.shuffle.io.maxRetries=3
   --jars $JARS \
   local:///workspace/pyspark/$PYSPARK_CODE_NAME --config $CONFIG_FILE --mode cluster --image $FULL_IMAGE_PATH
 "
