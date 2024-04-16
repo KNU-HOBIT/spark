@@ -449,7 +449,7 @@ end_timer()
 print("="*100)
 
 # Specify the number of partitions
-num_partitions = 400
+num_partitions = 3
 
 # Perform the repartition
 try:
