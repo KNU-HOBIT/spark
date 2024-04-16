@@ -17,13 +17,13 @@ readarray -t JAR_URLS < <(jq -r '.JAR_URLS[]' $CONFIG_FILE)
 # 배열을 쉼표로 구분된 문자열로 변환
 JARS=$(IFS=,; echo "${JAR_URLS[*]}")
 
-echo "-----"
-echo $JARS
-echo "-----"
+# echo "-----"
+# echo $JARS
+# echo "-----"
 
 # 로컬 모드(개발)
 spark-submit \
-    --jars $JARS \  
+    --jars $JARS \
     read-dataset.py \
     --config $CONFIG_FILE \
     --mode local

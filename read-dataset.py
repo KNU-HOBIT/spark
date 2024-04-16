@@ -74,27 +74,26 @@ if args.mode == 'cluster' and not args.image:
 with open(args.config, 'r') as f:
     config = json.load(f)
     
+print(f"Running in {'local' if args.mode == 'local' else 'cluster'} mode")
+    
 # MongoDB URL 선택
 if args.mode == 'local':
     mongo_url = config['EXTERNAL_MONGODB_URL']
 else:
     mongo_url = config['K8S_INTERNAL_MONGODB_URL']
-
-print(f"Running in {'local' if args.mode == 'local' else 'cluster'} mode")
-
-
+    
 # SparkSession 생성
 spark = SparkSession.builder \
         .appName(config['SPARK_JOB_NAME']) \
         .getOrCreate()
+spark.sparkContext.setLogLevel('WARN')
+
 
 # --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2
 # 를 사용했지만, 이 옵션은 위의 라이브러리 + 종속 라이브러리들을 드라이버 노드에만, 자동으로 다운로드함.
 #
 # 하지만, 워커노드에는 위 라이브러리들이 할당되지 않아, 코드가 cluster모드로 k8s에 제출되어도 작동하지않는 문제점이 있었음
 # --jars <URL1>,<URL2>,<URL3>,... 를 이용하여 메이블 레포 링크를 걸어 마스터노드+워커노드 전부 jar 라이브러리를 할당할 수 있다.
-
-spark.sparkContext.setLogLevel('WARN')
 
 print("="*100)
 print("FILES IN THIS DIRECTORY")
@@ -192,48 +191,40 @@ print("="*100)
 ####################################################################################################
 ##################################     MongoDB Example      ########################################
 ####################################################################################################
-from pyspark.sql import Row
+# from pyspark.sql import Row
 
-# 예제 데이터 생성
-print("7. MONGODB TEST / 예제 데이터 생성")
-print("="*100)
-data = [Row(name="noyusu", age=25), Row(name="noFlowWater", age=30)]
-df = spark.createDataFrame(data)
-print(df.show(10))
-print("="*100)
+# # 예제 데이터 생성
+# print("7. MONGODB TEST / 예제 데이터 생성")
+# print("="*100)
+# data = [Row(name="noyusu", age=25), Row(name="noFlowWater", age=30)]
+# df = spark.createDataFrame(data)
+# print(df.show(10))
+# print("="*100)
 
-# MongoDB URL 선택
-if args.mode == 'local':
-    mongo_url = config['EXTERNAL_MONGODB_URL']
-else:
-    mongo_url = config['K8S_INTERNAL_MONGODB_URL']
 
-# MongoDB에 데이터 쓰기
-print("8. MongoDB에 데이터 쓰기")
-print(mongo_url)
-print(config["MONGODB_DATABASE_NAME"])
-print(config["MONGODB_COLLECTION_NAME"])
-df.write.format("mongodb") \
-    .option("spark.mongodb.write.connection.uri", mongo_url) \
-    .option("spark.mongodb.write.database", config["MONGODB_DATABASE_NAME"]) \
-    .option("spark.mongodb.write.collection", config["MONGODB_COLLECTION_NAME"]) \
-    .mode("append").save()
+# # MongoDB에 데이터 쓰기
+# print("8. MongoDB에 데이터 쓰기")
+# df.write.format("mongodb") \
+#     .option("spark.mongodb.write.connection.uri", mongo_url) \
+#     .option("spark.mongodb.write.database", config["MONGODB_DATABASE_NAME"]) \
+#     .option("spark.mongodb.write.collection", config["MONGODB_COLLECTION_NAME"]) \
+#     .mode("append").save()
 
-print("="*100)
+# print("="*100)
 
-# MongoDB에서 데이터 읽기
-print("9. MongoDB에서 데이터 읽기")
-df_loaded = spark.read.format("mongodb") \
-    .option("spark.mongodb.read.connection.uri", mongo_url) \
-    .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
-    .option("spark.mongodb.read.collection", config["MONGODB_COLLECTION_NAME"]) \
-    .load()
-print("="*100)
+# # MongoDB에서 데이터 읽기
+# print("9. MongoDB에서 데이터 읽기")
+# df_loaded = spark.read.format("mongodb") \
+#     .option("spark.mongodb.read.connection.uri", mongo_url) \
+#     .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
+#     .option("spark.mongodb.read.collection", config["MONGODB_COLLECTION_NAME"]) \
+#     .load()
+# print("="*100)
 
-# 읽어온 데이터 출력
-print("10. MongoDB에서 데이터 읽기")
-df_loaded.show()
-print("="*100)
+# # 읽어온 데이터 출력
+# print("10. MongoDB에서 데이터 읽기")
+# df_loaded.show()
+# print("="*100)
 
 ####################################################################################################
 ##################################     MongoDB Example      ########################################
@@ -245,21 +236,20 @@ print("="*100)
 
 
     
-# # MongoDB에서 데이터 읽기
-# print("9. MongoDB에서 데이터 읽기")
+# MongoDB에서 데이터 읽기
+print("9. MongoDB에서 데이터 읽기")
 
-# final_mongo_url=mongo_url+config["MONGODB_DATABASE_NAME"]+"."+config["MONGODB_COLLECTION_NAME"]
-# print(final_mongo_url)
+df_loaded = spark.read.format("mongodb") \
+    .option("spark.mongodb.read.connection.uri", mongo_url) \
+    .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
+    .option("spark.mongodb.read.collection", "transport") \
+    .load()
+print("="*100)
 
-# df_loaded = spark.read.format("mongodb") \
-#     .option("spark.mongodb.read.connection.uri", final_mongo_url) \
-#     .load()
-# print("="*100)
-
-# # 읽어온 데이터 출력
-# print("10. MongoDB에서 데이터 읽기")
-# df_loaded.show()
-# print("="*100)
+# 읽어온 데이터 출력
+print("10. MongoDB에서 데이터 읽기")
+df_loaded.show()
+print("="*100)
 
 
 
