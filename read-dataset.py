@@ -85,6 +85,7 @@ else:
 # SparkSession 생성
 spark = SparkSession.builder \
         .appName(config['SPARK_JOB_NAME']) \
+        .config("spark.mongodb.input.partitioner", "com.mongodb.spark.sql.connector.read.partitioner.PaginateIntoPartitionsPartitioner") \
         .getOrCreate()
 spark.sparkContext.setLogLevel('WARN')
 
@@ -443,9 +444,6 @@ df_loaded = spark.read.format("mongodb") \
     .option("spark.mongodb.read.connection.uri", mongo_url) \
     .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
     .option("spark.mongodb.read.collection", "transport") \
-    .option("spark.mongodb.read.partitioner", "SamplePartitioner") \
-    .option("spark.mongodb.read.partitionerOptions.partitionSizeMB", "64") \
-    .option("spark.mongodb.read.partitionerOptions.samplesPerPartition", "10") \
     .load()
 end_timer()
 print("="*100)
