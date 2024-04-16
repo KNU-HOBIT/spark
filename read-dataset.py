@@ -448,6 +448,17 @@ df_loaded = spark.read.format("mongodb") \
 end_timer()
 print("="*100)
 
+# Specify the number of partitions
+num_partitions = 4
+
+# Perform the repartition
+try:
+    df_repartitioned = df_loaded.repartition(num_partitions)
+    print(f"DataFrame successfully repartitioned into {num_partitions} partitions.")
+except Exception as e:
+    print("Failed to repartition DataFrame:", e)
+
+
 # 읽어온 데이터 출력
 print("10. MongoDB에서 데이터 읽기")
 df_loaded.show()
