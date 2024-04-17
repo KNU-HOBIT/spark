@@ -83,7 +83,6 @@ else:
 # SparkSession 생성
 spark = SparkSession.builder \
         .appName(config['SPARK_JOB_NAME']) \
-        .config("spark.mongodb.input.partitioner", "com.mongodb.spark.sql.connector.read.partitioner.PaginateIntoPartitionsPartitioner") \
         .getOrCreate()
 spark.sparkContext.setLogLevel('WARN')
 
@@ -443,15 +442,27 @@ df_loaded = spark.read.format("mongodb") \
     .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
     .option("spark.mongodb.read.collection", "transport") \
     .load() \
-    .sample(False, 0.5)
+    .sample(False, 0.01)
 
-print("레코드 수를 절반으로 줄이기")
+print("레코드 수를 99퍼 날리기.으로 줄이기")
 end_timer()
-print("="*100)
+# Specify the number of partitions
+# num_partitions = 3
 
-start_timer("레코드 수 출력")
-print(f"Record count: {df_loaded.count()}")
-end_timer()
+# # Perform the repartition
+# try:
+#     df_repartitioned = df_loaded.repartition(num_partitions)
+#     print(f"train_data dataFrame successfully repartitioned into {num_partitions} partitions.")
+# except Exception as e:
+#     print("Failed to repartition DataFrame:", e)
+
+# start_timer("Current number of partitions...")
+# print("Current number of partitions:", df_repartitioned.rdd.getNumPartitions())
+# end_timer()
+# start_timer("Record count..")
+# print(f"Record count: {df_repartitioned.count()}")
+# end_timer()
+
 # 읽어온 데이터 출력
 # print("10. MongoDB에서 데이터 읽기")
 # df_loaded.show()
@@ -479,8 +490,10 @@ train_data, test_data = data.randomSplit([0.8, 0.2], seed=42)
 end_timer()
 
 # Specify the number of partitions
-num_partitions = 3
+num_partitions = 20 # executor (5) X core (4)
 
+
+start_timer("14. 선형 회귀 모델을 학습")
 # Perform the repartition
 try:
     df_repartitioned = train_data.repartition(num_partitions)
@@ -488,13 +501,24 @@ try:
 except Exception as e:
     print("Failed to repartition DataFrame:", e)
 
-start_timer("14. 선형 회귀 모델을 학습")
+
 lr = LinearRegression(featuresCol="features", labelCol="label")
-model = lr.fit(train_data)
+model = lr.fit(df_repartitioned)
 end_timer()
 
+# Specify the number of partitions
+num_partitions = 20 # executor (5) X core (4)
+
+
 start_timer("15. 테스트 데이터를 사용하여 모델을 평가")
-predictions = model.transform(test_data)
+# Perform the repartition
+try:
+    df_repartitioned = test_data.repartition(num_partitions)
+    print(f"train_data dataFrame successfully repartitioned into {num_partitions} partitions.")
+except Exception as e:
+    print("Failed to repartition DataFrame:", e)
+
+predictions = model.transform(df_repartitioned)
 evaluator = RegressionEvaluator(labelCol="label", predictionCol="prediction", metricName="rmse")
 rmse = evaluator.evaluate(predictions)
 end_timer()

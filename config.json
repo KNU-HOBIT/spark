@@ -1,7 +1,7 @@
 {
     "SPARK_JOB_NAME" : "test",
-    "NUM_EXECUTORS" : 3,
-    "EXECUTOR_CORES" : 8,
+    "NUM_EXECUTORS" : 5,
+    "EXECUTOR_CORES" : 4,
     "EXECUTOR_MEMORY" : "15G",
     "IMAGE_REPO_NAME" : "noyusu",
     "SERVICEACCOUNT_NAME" : "spark",
