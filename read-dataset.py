@@ -442,7 +442,7 @@ df_loaded = spark.read.format("mongodb") \
     .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
     .option("spark.mongodb.read.collection", "transport") \
     .load() \
-    .sample(False, 0.01)
+    .sample(False, 0.0001)
 
 print("레코드 수를 99퍼 날리기.으로 줄이기")
 end_timer()
