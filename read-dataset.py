@@ -8,11 +8,9 @@ import datetime
 import json
 import os
 
-
 #########################################################################
 ###########################  Utils  #####################################
 #########################################################################
-
 
 # Python 데이터 타입을 Spark SQL 데이터 타입으로 매핑
 def get_spark_data_type(python_type):
@@ -444,34 +442,23 @@ df_loaded = spark.read.format("mongodb") \
     .option("spark.mongodb.read.connection.uri", mongo_url) \
     .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
     .option("spark.mongodb.read.collection", "transport") \
-    .load()
+    .load() \
+    .sample(False, 0.5)
+
+print("레코드 수를 절반으로 줄이기")
 end_timer()
 print("="*100)
 
-# Specify the number of partitions
-num_partitions = 3
-
-# Perform the repartition
-try:
-    df_repartitioned = df_loaded.repartition(num_partitions)
-    print(f"DataFrame successfully repartitioned into {num_partitions} partitions.")
-except Exception as e:
-    print("Failed to repartition DataFrame:", e)
-
-
+start_timer("레코드 수 출력")
+print(f"Record count: {df_loaded.count()}")
+end_timer()
 # 읽어온 데이터 출력
-print("10. MongoDB에서 데이터 읽기")
-df_loaded.show()
-print("="*100)
-df_loaded.printSchema()
-print("="*100)
+# print("10. MongoDB에서 데이터 읽기")
+# df_loaded.show()
+# print("="*100)
+# df_loaded.printSchema()
+# print("="*100)
 
-def process_data(df):
-    agg_df = df.groupBy("eqp_id").avg("weight")
-    return agg_df
-start_timer("(eqp_id)별 평균 weight을 계산")
-result = process_data(df_loaded)
-end_timer()
 
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.regression import LinearRegression
@@ -490,6 +477,16 @@ end_timer()
 start_timer("13. 데이터를 훈련 세트와 테스트 세트로 분할")
 train_data, test_data = data.randomSplit([0.8, 0.2], seed=42)
 end_timer()
+
+# Specify the number of partitions
+num_partitions = 3
+
+# Perform the repartition
+try:
+    df_repartitioned = train_data.repartition(num_partitions)
+    print(f"train_data dataFrame successfully repartitioned into {num_partitions} partitions.")
+except Exception as e:
+    print("Failed to repartition DataFrame:", e)
 
 start_timer("14. 선형 회귀 모델을 학습")
 lr = LinearRegression(featuresCol="features", labelCol="label")
