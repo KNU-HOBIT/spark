@@ -433,19 +433,19 @@ print("="*100)
 
     
 # MongoDB에서 데이터 읽기
-print("9. MongoDB에서 데이터 읽기")
+# print("9. MongoDB에서 데이터 읽기")
 
 
-start_timer("MongoDB에서 데이터 읽기")
-df_loaded = spark.read.format("mongodb") \
-    .option("spark.mongodb.read.connection.uri", mongo_url) \
-    .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
-    .option("spark.mongodb.read.collection", "transport") \
-    .load() \
-    .sample(False, 0.0001)
+# start_timer("MongoDB에서 데이터 읽기")
+# df_loaded = spark.read.format("mongodb") \
+#     .option("spark.mongodb.read.connection.uri", mongo_url) \
+#     .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
+#     .option("spark.mongodb.read.collection", "transport") \
+#     .load() \
+#     .sample(False, 0.0001)
 
-print("레코드 수를 99퍼 날리기.으로 줄이기")
-end_timer()
+# print("레코드 수를 99퍼 날리기.으로 줄이기")
+# end_timer()
 # Specify the number of partitions
 # num_partitions = 3
 
@@ -474,52 +474,77 @@ end_timer()
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.regression import LinearRegression
 from pyspark.ml.evaluation import RegressionEvaluator
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+from pyspark.ml.feature import VectorAssembler
+from pyspark.ml.regression import LinearRegression
+from pyspark.ml import Pipeline
+from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
+from pyspark.ml.evaluation import RegressionEvaluator
+from pyspark.sql.types import DoubleType
 
-start_timer("11. 특성 선택 및 벡터 생성")
-feature_columns = ['gps_lat', 'gps_lon', 'speed', 'move_distance', 'move_time']  # 예측에 사용할 특성
+
+data_path = "./data/small_test.csv"
+df = spark.read.csv(data_path, header=True, inferSchema=True)
+df = df.withColumn("FL03_TEMP", col("FL03_TEMP").cast(DoubleType()))
+
+start_timer("데이터 전처리")
+# 데이터 전처리
+df = df.na.fill(0)  # 결측치 처리
+end_timer()
+# 특성 선택 및 벡터 생성
+
+start_timer("특성 선택 및 벡터 생성")
+feature_columns = ['EX_HUM', 'EN_HUM', 'CURTEMP', 'EX_TEMP', 'SETMODE', 'OUTSTATUS', 'FL03_HUM', 'FL10_TEMP', 'FL10_HUM', 'FL03_TEMP']
 assembler = VectorAssembler(inputCols=feature_columns, outputCol="features")
-data = assembler.transform(df_loaded)
+data_prepared = assembler.transform(df)
+data_prepared = data_prepared.withColumn("label", col("EN_TEMP"))
 end_timer()
 
-start_timer("12. 'weight'는 레이블로 사용")
-data = data.withColumnRenamed("weight", "label")
+
+# 데이터 분할
+start_timer("데이터 분할")
+train_data, test_data = data_prepared.randomSplit([0.8, 0.2], seed=42)
 end_timer()
 
-start_timer("13. 데이터를 훈련 세트와 테스트 세트로 분할")
-train_data, test_data = data.randomSplit([0.8, 0.2], seed=42)
-end_timer()
 
-# Specify the number of partitions
-num_partitions = config["NUM_EXECUTORS"] * config["EXECUTOR_CORES"] * 2 # executor (5) X core (4) X (2)
-
-
-start_timer("14. 선형 회귀 모델을 학습")
-# Perform the repartition
-try:
-    df_repartitioned = train_data.repartition(num_partitions)
-    print(f"train_data dataFrame successfully repartitioned into {num_partitions} partitions.")
-except Exception as e:
-    print("Failed to repartition DataFrame:", e)
-
-
+# 선형 회귀 모델 및 파이프라인 설정
+start_timer("선형 회귀 모델 및 파이프라인 설정")
 lr = LinearRegression(featuresCol="features", labelCol="label")
-model = lr.fit(df_repartitioned)
+pipeline = Pipeline(stages=[lr])
 end_timer()
 
 
-start_timer("15. 테스트 데이터를 사용하여 모델을 평가")
-# Perform the repartition
-try:
-    df_repartitioned = test_data.repartition(num_partitions)
-    print(f"test_data dataFrame successfully repartitioned into {num_partitions} partitions.")
-except Exception as e:
-    print("Failed to repartition DataFrame:", e)
+# 교차 검증 및 파라미터 그리드 설정
+start_timer("교차 검증 및 파라미터 그리드 설정")
+paramGrid = ParamGridBuilder() \
+    .addGrid(lr.regParam, [0.1, 0.01, 0.001]) \
+    .addGrid(lr.elasticNetParam, [0.0, 0.5, 1.0]) \
+    .addGrid(lr.maxIter, [10, 50, 100]) \
+    .build()
+crossval = CrossValidator(estimator=pipeline,
+                          estimatorParamMaps=paramGrid,
+                          evaluator=RegressionEvaluator(),
+                          numFolds=3)
+end_timer()
 
-predictions = model.transform(df_repartitioned)
+
+# 모델 학습
+start_timer("모델 학습")
+model = crossval.fit(train_data)
+end_timer()
+
+# 모델 평가
+start_timer("모델 평가")
+predictions = model.transform(test_data)
+predictions.select("prediction", "label").show()
 evaluator = RegressionEvaluator(labelCol="label", predictionCol="prediction", metricName="rmse")
 rmse = evaluator.evaluate(predictions)
-end_timer()
 print("Root Mean Squared Error (RMSE) on test data =", rmse)
+end_timer()
+
+# 종료
+spark.stop()
 
 
 ####################################################################################################
