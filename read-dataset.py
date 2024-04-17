@@ -490,7 +490,7 @@ train_data, test_data = data.randomSplit([0.8, 0.2], seed=42)
 end_timer()
 
 # Specify the number of partitions
-num_partitions = 20 # executor (5) X core (4)
+num_partitions = config["NUM_EXECUTORS"] * config["EXECUTOR_CORES"] * 2 # executor (5) X core (4) X (2)
 
 
 start_timer("14. 선형 회귀 모델을 학습")
@@ -506,15 +506,12 @@ lr = LinearRegression(featuresCol="features", labelCol="label")
 model = lr.fit(df_repartitioned)
 end_timer()
 
-# Specify the number of partitions
-num_partitions = 20 # executor (5) X core (4)
-
 
 start_timer("15. 테스트 데이터를 사용하여 모델을 평가")
 # Perform the repartition
 try:
     df_repartitioned = test_data.repartition(num_partitions)
-    print(f"train_data dataFrame successfully repartitioned into {num_partitions} partitions.")
+    print(f"test_data dataFrame successfully repartitioned into {num_partitions} partitions.")
 except Exception as e:
     print("Failed to repartition DataFrame:", e)
 
