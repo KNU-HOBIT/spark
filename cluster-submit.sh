@@ -31,6 +31,9 @@ $SPARK_HOME/bin/spark-submit \
   --executor-memory $EXECUTOR_MEMORY \
   --conf spark.kubernetes.container.image=$FULL_IMAGE_PATH \
   --conf spark.kubernetes.authenticate.driver.serviceAccountName=$SERVICEACCOUNT_NAME \
+  --conf spark.default.parallelism=$((EXECUTOR_CORES * NUM_EXECUTORS * 2)) \
+  --conf spark.sql.shuffle.partitions=$((EXECUTOR_CORES * NUM_EXECUTORS * 2)) \
+  --conf spark.scheduler.mode=FAIR \
   --jars $JARS \
   local:///workspace/pyspark/$PYSPARK_CODE_NAME --config $CONFIG_FILE --mode cluster --image $FULL_IMAGE_PATH
 "
