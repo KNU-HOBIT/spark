@@ -1,4 +1,6 @@
 from pyspark.sql import SparkSession, Row
+from pyspark.conf import SparkConf
+from pyspark.context import SparkContext
 from pyspark.sql.types import IntegerType, StructType, StructField, StringType, FloatType, TimestampType
 import time as timer
 import pandas as pd
@@ -84,7 +86,10 @@ else:
 spark = SparkSession.builder \
         .appName(config['SPARK_JOB_NAME']) \
         .getOrCreate()
-spark.sparkContext.setLogLevel('WARN')
+
+sc = spark.sparkContext
+sc.setLogLevel('WARN')
+
 
 
 # --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2
@@ -98,7 +103,9 @@ print("FILES IN THIS DIRECTORY")
 print(os.listdir(os.getcwd()))
 print("="*100)
 
-
+print("Current Spark configuration:")
+for key, value in sorted(sc._conf.getAll(), key=lambda x: x[0]):
+    print(f"{key} = {value}")
 #########################################################################
 ###########################  Kafka  #####################################
 #########################################################################
@@ -444,14 +451,18 @@ df_loaded = spark.read.format("mongodb") \
     .load()
 end_timer()
     
-    
+
 start_timer("데이터 쪼개기")
 df_loaded = df_loaded.sample(False, 0.001)
 end_timer()
 
+start_timer("캐싱")
+df_loaded.cache()
+end_timer()
 
-import sys
-import pickle
+
+# import sys
+# import pickle
 
 
 # start_timer("RDD로 변환 후 각 레코드의 크기 추정")
@@ -542,6 +553,7 @@ end_timer()
 
 # 캐시 할당
 start_timer("캐시 할당")
+df_loaded.unpersist()
 train_data.cache()
 test_data.cache()
 end_timer()
