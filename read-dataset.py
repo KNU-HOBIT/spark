@@ -436,15 +436,40 @@ print("="*100)
 # print("9. MongoDB에서 데이터 읽기")
 
 
-# start_timer("MongoDB에서 데이터 읽기")
-# df_loaded = spark.read.format("mongodb") \
-#     .option("spark.mongodb.read.connection.uri", mongo_url) \
-#     .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
-#     .option("spark.mongodb.read.collection", "transport") \
-#     .load() \
-#     .sample(False, 0.0001)
+start_timer("MongoDB에서 데이터 읽기")
+df_loaded = spark.read.format("mongodb") \
+    .option("spark.mongodb.read.connection.uri", mongo_url) \
+    .option("spark.mongodb.read.database", config["MONGODB_DATABASE_NAME"]) \
+    .option("spark.mongodb.read.collection", "transport") \
+    .load()
+end_timer()
+    
+    
+start_timer("데이터 쪼개기")
+df_loaded = df_loaded.sample(False, 0.001)
+end_timer()
 
-# print("레코드 수를 99퍼 날리기.으로 줄이기")
+
+import sys
+import pickle
+
+
+# start_timer("RDD로 변환 후 각 레코드의 크기 추정")
+
+# # RDD로 변환 후 각 레코드의 크기 추정
+# def estimate_size(row):
+#     return sys.getsizeof(pickle.dumps(row))
+
+# # 각 레코드의 크기를 계산
+# sizes_rdd = df_loaded.rdd.map(estimate_size)
+
+# # 전체 크기 및 레코드 수 계산
+# total_size = sizes_rdd.sum()
+# num_records = sizes_rdd.count()
+
+# # 평균 레코드 크기 계산
+# average_size = total_size / num_records
+# print(f"Average record size: {average_size} bytes")
 # end_timer()
 # Specify the number of partitions
 # num_partitions = 3
@@ -484,69 +509,80 @@ from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.sql.types import DoubleType
 
 
-data_path = "./data/small_test.csv"
-df = spark.read.csv(data_path, header=True, inferSchema=True)
-df = df.withColumn("FL03_TEMP", col("FL03_TEMP").cast(DoubleType()))
+# data_path = "./data/small_test.csv"
+# df = spark.read.csv(data_path, header=True, inferSchema=True)
+# df = df.withColumn("FL03_TEMP", col("FL03_TEMP").cast(DoubleType()))
 
-start_timer("데이터 전처리")
+
 # 데이터 전처리
-df = df.na.fill(0)  # 결측치 처리
+start_timer("데이터 전처리")
+df = df_loaded.na.fill(0)  # 결측치 처리
 end_timer()
 # 특성 선택 및 벡터 생성
 
+# 특성 선택 및 벡터 생성\
 start_timer("특성 선택 및 벡터 생성")
-feature_columns = ['EX_HUM', 'EN_HUM', 'CURTEMP', 'EX_TEMP', 'SETMODE', 'OUTSTATUS', 'FL03_HUM', 'FL10_TEMP', 'FL10_HUM', 'FL03_TEMP']
+feature_columns = ['gps_lat', 'gps_lon', 'speed', 'move_distance', 'move_time']
 assembler = VectorAssembler(inputCols=feature_columns, outputCol="features")
-data_prepared = assembler.transform(df)
-data_prepared = data_prepared.withColumn("label", col("EN_TEMP"))
+data = assembler.transform(df)
+data = data.withColumnRenamed("weight", "label")
 end_timer()
 
-
-# 데이터 분할
-start_timer("데이터 분할")
-train_data, test_data = data_prepared.randomSplit([0.8, 0.2], seed=42)
+# 데이터를 훈련 세트와 테스트 세트로 분할
+start_timer("데이터를 훈련 세트와 테스트 세트로 분할")
+train_data, test_data = data.randomSplit([0.8, 0.2], seed=42)
 end_timer()
 
+# 파티션 조정
+start_timer("파티션 조정")
+num_partitions = config["NUM_EXECUTORS"] * config["EXECUTOR_CORES"] * 2
+train_data = train_data.repartition(num_partitions)
+test_data = test_data.repartition(num_partitions)
+end_timer()
 
-# 선형 회귀 모델 및 파이프라인 설정
-start_timer("선형 회귀 모델 및 파이프라인 설정")
+# 캐시 할당
+start_timer("캐시 할당")
+train_data.cache()
+test_data.cache()
+end_timer()
+
+# 선형 회귀 모델 및 파이프라인 구성
+start_timer("선형 회귀 모델 및 파이프라인 구성")
 lr = LinearRegression(featuresCol="features", labelCol="label")
 pipeline = Pipeline(stages=[lr])
 end_timer()
-
 
 # 교차 검증 및 파라미터 그리드 설정
 start_timer("교차 검증 및 파라미터 그리드 설정")
 paramGrid = ParamGridBuilder() \
     .addGrid(lr.regParam, [0.1, 0.01, 0.001]) \
     .addGrid(lr.elasticNetParam, [0.0, 0.5, 1.0]) \
-    .addGrid(lr.maxIter, [10, 50, 100]) \
+    .addGrid(lr.maxIter, [10, 100, 1000]) \
     .build()
 crossval = CrossValidator(estimator=pipeline,
                           estimatorParamMaps=paramGrid,
                           evaluator=RegressionEvaluator(),
-                          numFolds=3)
+                          numFolds=3)  # 3-fold cross-validation
 end_timer()
 
 
 # 모델 학습
 start_timer("모델 학습")
-model = crossval.fit(train_data)
+cvModel = crossval.fit(train_data)
 end_timer()
 
-# 모델 평가
-start_timer("모델 평가")
-predictions = model.transform(test_data)
-predictions.select("prediction", "label").show()
+# 테스트 데이터에 대한 평가
+start_timer("테스트 데이터에 대한 평가")
+predictions = cvModel.transform(test_data)
 evaluator = RegressionEvaluator(labelCol="label", predictionCol="prediction", metricName="rmse")
 rmse = evaluator.evaluate(predictions)
 print("Root Mean Squared Error (RMSE) on test data =", rmse)
 end_timer()
 
-# 종료
+train_data.unpersist()
+test_data.unpersist()
+
 spark.stop()
-
-
 ####################################################################################################
 ##################################         MongoDB          ########################################
 ####################################################################################################

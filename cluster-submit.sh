@@ -30,9 +30,11 @@ $SPARK_HOME/bin/spark-submit \
   --executor-cores $EXECUTOR_CORES \
   --executor-memory $EXECUTOR_MEMORY \
   --conf spark.kubernetes.container.image=$FULL_IMAGE_PATH \
+  --conf spark.kubernetes.driver.pod.name=$SPARK_JOB_NAME-driver \
   --conf spark.kubernetes.authenticate.driver.serviceAccountName=$SERVICEACCOUNT_NAME \
   --conf spark.default.parallelism=$((EXECUTOR_CORES * NUM_EXECUTORS * 2)) \
   --conf spark.sql.shuffle.partitions=$((EXECUTOR_CORES * NUM_EXECUTORS * 2)) \
+  --conf spark.kubernetes.executor.request.cores=$EXECUTOR_CORES \
   --conf spark.scheduler.mode=FAIR \
   --conf spark.kubernetes.local.dirs.tmpfs=true \
   --conf spark.submit.deployMode=cluster \
