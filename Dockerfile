@@ -1,4 +1,4 @@
-FROM noyusu/pyspark-base:3.2.4
+FROM noyusu/pyspark:3.2.4
 
 USER root
 
