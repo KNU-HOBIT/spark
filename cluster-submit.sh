@@ -37,7 +37,6 @@ $SPARK_HOME/bin/spark-submit \
   --conf spark.kubernetes.executor.request.cores=$EXECUTOR_CORES \
   --conf spark.scheduler.mode=FAIR \
   --conf spark.kubernetes.local.dirs.tmpfs=true \
-  --conf spark.submit.deployMode=cluster \
   --jars $JARS \
   local:///workspace/pyspark/$PYSPARK_CODE_NAME --config $CONFIG_FILE --mode cluster --image $FULL_IMAGE_PATH
 "
