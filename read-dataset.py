@@ -92,7 +92,7 @@ sc.setLogLevel('WARN')
 
 
 
-# --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2
+# --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2 
 # 를 사용했지만, 이 옵션은 위의 라이브러리 + 종속 라이브러리들을 드라이버 노드에만, 자동으로 다운로드함.
 #
 # 하지만, 워커노드에는 위 라이브러리들이 할당되지 않아, 코드가 cluster모드로 k8s에 제출되어도 작동하지않는 문제점이 있었음
