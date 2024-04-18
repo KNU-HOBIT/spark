@@ -58,33 +58,18 @@ Github Action을 이용해서,
     이 후, `build` -> `push` -> `job-submit` 과정에서 사용되는 이미지 tag가 중복되지않고 매번 다르게 설정이 되어 해결되었다.
 
 
-2) `kubernetes/dockerfiles/spark/bindings/python/Dockerfile` 을 수정하여, Python3.10.12버전으로 고정하였고, 마찬가지로 로컬 내의 가상환경도 이와 같이 고정 시켜 해결.
+2) `kubernetes/dockerfiles/spark/bindings/python/Dockerfile` 을 수정
 
     ```
     ######################## 수정 ##############################
 
-    RUN mkdir ${SPARK_HOME}/python
-    RUN apt-get update && \
-        apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget && \
-        # Download and install Python 3.10.12
-        wget https://www.python.org/ftp/python/3.10.12/Python-3.10.12.tgz && \
-        tar -xvf Python-3.10.12.tgz && \
-        cd Python-3.10.12 && \
-        ./configure --enable-optimizations && \
-        make altinstall && \
-        # Use ensurepip to install pip for Python 3.10
-        /usr/local/bin/python3.10 -m ensurepip && \
-        # Upgrade pip to the latest version
-        /usr/local/bin/python3.10 -m pip install --upgrade pip && \
-        # Set up alternatives
-        update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.10 1 && \
-        update-alternatives --install /usr/bin/python python /usr/local/bin/python3.10 1 && \
-        # Set python3.10 as the default python and python3
-        update-alternatives --set python /usr/local/bin/python3.10 && \
-        update-alternatives --set python3 /usr/local/bin/python3.10 && \
-        # Cleanup
-        cd .. && rm -rf Python-3.10.12 Python-3.10.12.tgz && \
-        rm -rf /root/.cache && rm -rf /var/cache/apt/* && rm -rf /var/lib/apt/lists/*
+     RUN mkdir ${SPARK_HOME}/python
+     RUN apt-get update && \
+     apt install -y python3 python3-pip && \
+     pip3 install --upgrade pip setuptools && \
+     pip install pyspark==3.2.4 && \
+     # Removed the .cache to save space
+     rm -r /root/.cache && rm -rf /var/cache/apt/*
 
     ############################################################
     ```
@@ -117,7 +102,21 @@ Github Action을 이용해서,
         ```
         python3.10 -m venv myenv
         ```
-   
+
+3) `SPARK_HOME/kubernetes/dockerfiles/spark/entrypoint.sh`의 내용 수정.
+     ```
+     case "$1" in
+     driver)
+     shift 1
+     CMD=(
+          "$SPARK_HOME/bin/spark-submit"
+          --conf "spark.driver.bindAddress=$SPARK_DRIVER_BIND_ADDRESS"
+          --deploy-mode cluster
+          "$@"
+     )
+     ;;
+     ```
+     디플로이모드가 client로 고정되어있는 것을 수정
 
 ## HOW to DEPLOY
 
