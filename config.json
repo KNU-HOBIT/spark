@@ -1,0 +1,35 @@
+{
+    "SPARK_JOB_NAME" : "test",
+    "NUM_EXECUTORS" : 5,
+    "EXECUTOR_CORES" : 4,
+    "EXECUTOR_MEMORY" : "15G",
+    "IMAGE_REPO_NAME" : "noyusu",
+    "SERVICEACCOUNT_NAME" : "spark",
+
+    "LOCAL_ENV_PYTHON" : "/home/scouter/anaconda3/envs/myenv/bin/python",
+    "SPARK_HOME": "/home/scouter/spark-on-k8s/spark-3.2.4-bin-hadoop3.2",
+    "PYSPARK_CODE_NAME" : "read-dataset.py",
+
+    "K8S_CLUSTER_ADDRESS" : "https://155.230.34.51:6443",
+
+    "K8S_INTERNAL_KAFKA_BOOTSTRAP_URLS" : ["my-cluster-kafka-bootstrap.kafka:9094"],
+    "EXTERNAL_KAFKA_BOOTSTRAP_URLS" : ["155.230.34.51:32100","155.230.34.52:32100","155.230.34.53:32100"],
+    
+    "K8S_INTERNAL_MONGODB_URL" : "mongodb://adminuser:password123@mongo-nodeport-svc.mongodb/",
+    "EXTERNAL_MONGODB_URL" : "mongodb://adminuser:password123@155.230.34.51:32323/",
+
+    "MONGODB_DATABASE_NAME" : "test_database",
+    "MONGODB_COLLECTION_NAME" : "test_col",
+
+    "EXTERNAL_INFLUXDB_URL" : "http://155.230.34.51:32145",
+    "K8S_INTERNAL_INFLUXDB_URL" : "http://influxdb-influxdb2.influxdb:80",
+    "INFLUXDB_TOKEN" : "mat0Zu_uCrONU-pQ67KaZbPTvh5O-rMKU7f9YLnPiX0NvNccLLzarfrv7OLY9EHEWCIRaAxow5LIEbjPrC7I_g==",
+
+    "JAR_URLS": [
+      "https://repo1.maven.org/maven2/org/mongodb/spark/mongo-spark-connector_2.12/10.2.2/mongo-spark-connector_2.12-10.2.2.jar",
+      "https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-sync/4.8.2/mongodb-driver-sync-4.8.2.jar",
+      "https://repo1.maven.org/maven2/org/mongodb/bson/4.8.2/bson-4.8.2.jar",
+      "https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-core/4.8.2/mongodb-driver-core-4.8.2.jar",
+      "https://repo1.maven.org/maven2/org/mongodb/bson-record-codec/4.8.2/bson-record-codec-4.8.2.jar"
+    ]
+}
