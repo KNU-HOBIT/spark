@@ -1,4 +1,4 @@
-# Spark
+# Spark on K8s (deprecated)
 
 ## 환경 구축
 Github Action을 이용해서,
