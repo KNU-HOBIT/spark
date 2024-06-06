@@ -1,0 +1,83 @@
+name: cicd
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+    
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: << config.json에서 타겟 디렉토리 설정 >>
+        id: config-values
+        run: |
+          TARGET_DIR="/tmp/pyspark-files"
+          echo "Setting TARGET_DIR: $TARGET_DIR"
+          echo "target_dir=$TARGET_DIR" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: << 도커 Buildx 셋팅 >>
+        uses: docker/setup-buildx-action@v3
+  
+      - name: << 도커허브 로그인 >>
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: << 도커 이미지 Build & Push >>
+        id: docker-values
+        run: |
+          DATA_INFO=$(date +"%Y-%m-%d.%H-%M-%S")
+          IMAGE_TAG="${DATA_INFO}"
+          FULL_IMAGE_PATH="${DOCKER_USERNAME}/pyspark:${IMAGE_TAG}"
+          echo "full_image_path=$FULL_IMAGE_PATH" >> $GITHUB_OUTPUT
+          docker build -t $FULL_IMAGE_PATH .
+          docker push $FULL_IMAGE_PATH
+        env:
+          DOCKER_ID: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          IMAGE_REPO_NAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        shell: bash
+
+      - name: << 원격 서버 타겟 디렉토리 준비 >>
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SCOUTER01_SSH_HOST }}
+          username: ${{ secrets.SCOUTER01_SSH_USERNAME }}
+          key: ${{ secrets.YUSU_SSH_KEY }}
+          port: ${{ secrets.SCOUTER01_SSH_PORT }}
+          script: |
+            mkdir -p ${{ steps.config-values.outputs.target_dir }}/
+            rm -rf ${{ steps.config-values.outputs.target_dir }}/*
+
+      - name: << 저장소 파일 (config.json, cicd-submit-spark.sh) 복사 >> 
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SCOUTER01_SSH_HOST }}
+          username: ${{ secrets.SCOUTER01_SSH_USERNAME }}
+          key: ${{ secrets.YUSU_SSH_KEY }}
+          port: ${{ secrets.SCOUTER01_SSH_PORT }}
+          source: "config.json,cluster-submit.sh"
+          target: ${{ steps.config-values.outputs.target_dir }}
+          debug: "true"
+
+      - name: << Spark 작업 배포 >>
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SCOUTER01_SSH_HOST }}
+          username: ${{ secrets.SCOUTER01_SSH_USERNAME }}
+          key: ${{ secrets.YUSU_SSH_KEY }}
+          port: ${{ secrets.SCOUTER01_SSH_PORT }}
+          script: |
+            cd ${{ steps.config-values.outputs.target_dir }}
+            pwd
+            ls
+            chmod +x ./cluster-submit.sh
+            ./cluster-submit.sh ${{ steps.docker-values.outputs.full_image_path }}
+            cd ..
+            rm -rf ${{ steps.config-values.outputs.target_dir }}

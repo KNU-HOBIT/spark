@@ -1,0 +1,10 @@
+.git/
+.github/
+.gitignore
+myenv/
+*.sh
+README.md
+*log*
+.dockerignore
+Dockerfile
+plots/
